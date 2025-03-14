@@ -34,28 +34,16 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Views/Components/SocialLoginButton.swift,
 			);
 			target = D0C5B7022D844E5600380137 /* BloodConnect */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		D0C5B7492D84510000380137 /* Exceptions for "BloodConnect" folder in "Copy Bundle Resources" phase from "BloodConnect" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = D0C5B7012D844E5600380137 /* Resources */;
-			membershipExceptions = (
-				Views/Components/SocialLoginButton.swift,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D0C5B7052D844E5600380137 /* BloodConnect */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				D0C5B72B2D844E5800380137 /* Exceptions for "BloodConnect" folder in "BloodConnect" target */,
-				D0C5B7492D84510000380137 /* Exceptions for "BloodConnect" folder in "Copy Bundle Resources" phase from "BloodConnect" target */,
 			);
 			path = BloodConnect;
 			sourceTree = "<group>";
