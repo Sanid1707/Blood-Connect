@@ -1,273 +1,226 @@
-import SwiftUI
-
-import Security
-
-import Combine
-
-
-
-// Keychain Utility
-
-class KeychainUtility {
-
-    static func save(key: String, data: String) {
-
-        if let data = data.data(using: .utf8) {
-
-            let query: [CFString: Any] = [
-
-                kSecClass: kSecClassGenericPassword,
-
-                kSecAttrAccount: key,
-
-                kSecValueData: data
-
-            ]
-
-            
-
-            SecItemDelete(query as CFDictionary)
-
-            
-
-            let status = SecItemAdd(query as CFDictionary, nil)
-
-            assert(status == errSecSuccess, "Error saving to Keychain")
-
-        }
-
-    }
-
-    
-
-    static func load(key: String) -> String? {
-
-        let query: [CFString: Any] = [
-
-            kSecClass: kSecClassGenericPassword,
-
-            kSecAttrAccount: key,
-
-            kSecReturnData: true,
-
-            kSecMatchLimit: kSecMatchLimitOne
-
-        ]
-
-        
-
-        var item: CFTypeRef?
-
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-
-        
-
-        guard status == errSecSuccess, let data = item as? Data else {
-
-            return nil
-
-        }
-
-        
-
-        return String(data: data, encoding: .utf8)
-
-    }
-
-}
-
-
-
-// ContentView
-
-struct RegisterView: View {
-
-    @State private var name: String = UserDefaults.standard.string(forKey: "userName") ?? ""
-    
-    private var namePublisher = PassthroughSubject<String,Never>()
-
-    @State private var secret: String = ""
-
-    @State private var fileText: String = ""
-
-    
-
-    var body: some View {
-        
-        NavigationView {
-            
-            VStack {
-                
-                // TextField for Name
-                
-                TextField("Enter your name", text: $name)
-                
-                    .padding()
-                
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                    .onReceive(namePublisher) { newValue in
-                        
-                        UserDefaults.standard.set(newValue, forKey: "userName")
-                        
-                    }
-                    .onChange(of: name) { newName in
-                        
-                        namePublisher.send(newName)
-                        
-                    }
-                
-                Text("Saved name")
-                    .padding()
-                
-                Spacer()
-            }
-            .padding()
-        
-    
-                
-
-                // SecureField for Secret
-
-                SecureField("Enter a secret", text: $secret)
-
-                    .padding()
-
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                
-
-                Button(action: {
-
-                    KeychainUtility.save(key: "userSecret", data: secret)
-
-                }) {
-
-                    Text("Save Secret")
-
-                        .padding()
-
-                        .background(Color.blue)
-
-                        .foregroundColor(.white)
-
-                        .cornerRadius(8)
-
-                }
-
-                
-
-                Button(action: {
-
-                    if let loadedSecret = KeychainUtility.load(key: "userSecret") {
-
-                        self.secret = loadedSecret
-
-                    }
-
-                }) {
-
-                    Text("Load Secret")
-
-                        .padding()
-
-                        .background(Color.green)
-
-                        .foregroundColor(.white)
-
-                        .cornerRadius(8)
-
-                }
-
-                
-
-                Button(action: {
-
-                    self.loadFileData()
-
-                }) {
-
-                    Text("Load File Data")
-
-                        .padding()
-
-                        .background(Color.purple)
-
-                        .foregroundColor(.white)
-
-                        .cornerRadius(8)
-
-                }
-
-                
-
-                // Text to show File content
-
-                Text(fileText)
-
-                    .padding()
-
-                
-
-                Spacer()
-
-            }
-
-            .navigationBarTitle("Local Storage Example")
-
-            .padding()
-
-        }
-
-    
-
-    
-
-    // Load file data from the local file system
-
-    private func loadFileData() {
-
-        let fileURL = getDocumentsDirectory().appendingPathComponent("data.txt")
-
-        do {
-
-            let fileContents = try String(contentsOf: fileURL,encoding:.utf8)
-
-            self.fileText = fileContents
-
-        } catch {
-
-            self.fileText = "Failed to load file"
-
-        }
-
-    }
-
-    
-
-    // Get the directory to save files in the app's sandboxed file system
-
-    private func getDocumentsDirectory() -> URL {
-
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-
-        return paths[0]
-
-    }
-
-}
-
-
-
-struct Register_Previews: PreviewProvider {
-
-    static var previews: some View {
-
-        RegisterView()
-
-    }
-
-}
-
-
-
+//import SwiftUI
+//
+//struct RegisterView: View {
+//    // MARK: - State
+//    @StateObject private var viewModel = RegisterViewModel()
+//    @Environment(\.colorScheme) var colorScheme
+//    
+//    var body: some View {
+//        ZStack {
+//            // Background with gradient
+//            LinearGradient(
+//                gradient: Gradient(colors: [Color.white, Color(hex: "FFEEF1")]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//            )
+//            .ignoresSafeArea()
+//            
+//            // Blood drop pattern (subtle background)
+//            GeometryReader { geo in
+//                VStack(spacing: geo.size.height / 20) {
+//                    ForEach(0..<5) { row in
+//                        HStack(spacing: geo.size.width / 10) {
+//                            ForEach(0..<4) { col in
+//                                Image(systemName: "drop.fill")
+//                                    .foregroundColor(AppColor.primaryRed.opacity(0.03))
+//                                    .rotationEffect(.degrees(180))
+//                                    .offset(x: CGFloat((col % 2) * 10), y: CGFloat((row % 2) * 10))
+//                            }
+//                        }
+//                    }
+//                }
+//                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            }
+//            .ignoresSafeArea()
+//            
+//            // Main content
+//            ScrollView(showsIndicators: false) {
+//                VStack(alignment: .leading, spacing: 16) {
+//                    
+//                    // MARK: - Back Button
+//                    Button(action: {
+//                        viewModel.goBack()
+//                    }) {
+//                        Image(systemName: "arrow.left")
+//                            .font(.title3)
+//                            .foregroundColor(.black)
+//                            .padding(10)
+//                            .background(Color.white.opacity(0.8))
+//                            .clipShape(Circle())
+//                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+//                    }
+//                    .padding(.top, 8)
+//                    
+//                    // MARK: - Logo and Title
+//                    VStack(alignment: .leading, spacing: 6) {
+//                        HStack {
+//                            Image(systemName: "drop.fill")
+//                                .font(.title)
+//                                .foregroundColor(AppColor.primaryRed)
+//                            
+//                            Text("BloodConnect")
+//                                .font(.title3)
+//                                .fontWeight(.bold)
+//                                .foregroundColor(AppColor.primaryRed)
+//                        }
+//                        .padding(.bottom, 8)
+//                        
+//                        Text("Sign Up Your Account!")
+//                            .font(Typography.title)
+//                            .foregroundColor(.black)
+//                        
+//                        Text("Welcome to Blood Connect! Create a new account to continue")
+//                            .font(Typography.caption)
+//                            .foregroundColor(.gray)
+//                            .padding(.bottom, 5)
+//                    }
+//                    .padding(.top, 10)
+//                    
+//                    // MARK: - Text Fields
+//                    VStack(spacing: 16) {
+//                        // Email field
+//                        CustomTextField(
+//                            placeholder: "Name",
+//                            text: $viewModel.name,
+//                            icon:"person.fill"
+//                         
+//                        )
+//                        CustomTextField(
+//                            placeholder: "Email",
+//                            text: $viewModel.email,
+//                            icon:"envelope.fill"
+//                         
+//                        )
+//                        
+//                        // Password field
+//                        CustomTextField(
+//                            placeholder: "Password",
+//                            text: $viewModel.password,
+//                            isSecure: true,
+//                            icon: "lock.fill"
+//                        )
+//                        CustomTextField(
+//                            placeholder: "Confirm Password",
+//                            text: $viewModel.confirmPassword,
+//                            isSecure: true,
+//                            icon: "lock.fill"
+//                        )
+//                        CustomTextField(
+//                            placeholder: "Blood Group",
+//                            text: $viewModel.bloodGroup,
+//                            icon: "drop.fill"
+//                        )
+//                        CustomTextField(
+//                            placeholder: "Country",
+//                            text: $viewModel.country,
+//                            icon: "globe"
+//                        )
+//                        
+//                                               
+//                        
+//                    }
+//                    .padding(.top, 8)
+//                    
+//                    // MARK: - Remember Me & Forgot Password
+//                    HStack {
+//                        // Remember Me toggle with animation
+//                        Button(action: {
+//                            viewModel.agreeToTerms.toggle()
+//                        })
+//                        {
+//                            HStack(spacing:6)
+//                            {
+//                                Image(systemName: viewModel.agreeToTerms ?  "checkmark.square.fill": "square" )
+//                                    .foregroundColor(viewModel.agreeToTerms ? AppColor.primaryRed : .gray)
+//                                Text("I agree to the terms & conditions")
+//                                    .foregroundColor(   .black)
+//                                    .font(.footnote)
+//                            }
+//                        }
+//                    }
+//                    .padding(.top, 4)
+//                    
+//                    // MARK: - Sign In Button
+//                    CustomButton(
+//                        title: "Sign Up",
+//                        action: viewModel.signIn,
+//                        isLoading: viewModel.isLoading,
+//                        height: 50
+//                    )
+//                    .padding(.top, 16)
+//                    
+//                    // MARK: - OR Divider
+//                    HStack {
+//                        Rectangle()
+//                            .frame(height: 1)
+//                            .foregroundColor(.gray.opacity(0.3))
+//                        
+//                        Text("Or")
+//                            .foregroundColor(.gray)
+//                            .font(Typography.footnote)
+//                            .padding(.horizontal, 8)
+//                        
+//                        Rectangle()
+//                            .frame(height: 1)
+//                            .foregroundColor(.gray.opacity(0.3))
+//                    }
+//                    .padding(.vertical, 16)
+//                    
+//                   
+//                    VStack(spacing: 12) {
+//                        // Google Sign In Button
+//                        SocialLoginButton(provider: .google) {
+//                            viewModel.signUpWithGoogle()
+//                        }
+//                        
+//                        // Apple Sign In Button
+//                        SocialLoginButton(provider: .apple) {
+//                            viewModel.signUpWithApple()
+//                        }
+//                    }
+//                    .frame(maxWidth: .infinity)
+//                    
+//                    // MARK: - Sign Up Link
+//                    HStack {
+//                        Text("Already have an account?")
+//                            .foregroundColor(.gray)
+//                            .font(Typography.footnote)
+//                        
+//                        Button(action: {
+//                            viewModel.goToSignUp()
+//                        }) {
+//                            Text("Sign In")
+//                                .foregroundColor(AppColor.primaryRed)
+//                                .font(Typography.captionBold)
+//                                .underline()
+//                        }
+//                    }
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .padding(.top, 16)
+//                    .padding(.bottom, 8)
+//                }
+//                .padding(.horizontal, 24)
+//                .padding(.top, 8)
+//                .padding(.bottom, 20)
+//            }
+//            .safeAreaInset(edge: .bottom) {
+//                // Add a small spacer at the bottom to ensure content isn't cut off
+//                Color.clear.frame(height: 10)
+//            }
+//            
+//            // Show alert if there's an error
+//            .alert(isPresented: $viewModel.showAlert) {
+//                Alert(
+//                    title: Text("Error"),
+//                    message: Text(viewModel.alertMessage),
+//                    dismissButton: .default(Text("OK"))
+//                )
+//            }
+//        }
+//        .navigationBarHidden(true)
+//    }
+//}
+//
+//#Preview {
+//    RegisterView()
+//}

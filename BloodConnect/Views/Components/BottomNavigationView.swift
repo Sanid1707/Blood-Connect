@@ -10,7 +10,7 @@ enum Tab: String, CaseIterable {
         switch self {
         case .home: return "Home"
         case .inbox: return "Inbox"
-        case .notifications: return "Alerts"
+        case .notifications: return "Notification"
         case .profile: return "Profile"
         }
     }

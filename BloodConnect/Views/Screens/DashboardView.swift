@@ -16,7 +16,7 @@ struct DashboardView: View {
     
     // Sample data directly in the view to avoid dependencies
     let bloodSeekers = [
-        (name: "James Peterson", desc: "Lorem ipsum is simply dummy text of the printing and typesetting industry.", time: "5 Min Ago", location: "London, England", bloodType: "B+"),
+        (name: "James Peterson", desc: "I am anaemic and urgently need blood today.please reach out.Transportation and Feeding can be provided.", time: "5 Min Ago", location: "London, England", bloodType: "B+"),
         (name: "Sarah Johnson", desc: "Urgently need blood donation for surgery scheduled tomorrow morning.", time: "30 Min Ago", location: "Manchester, UK", bloodType: "O-"),
         (name: "Robert Williams", desc: "Need blood for emergency transfusion at City Hospital.", time: "1 Hour Ago", location: "Birmingham, UK", bloodType: "A+")
     ]
