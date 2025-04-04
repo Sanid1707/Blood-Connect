@@ -67,12 +67,12 @@ struct DashboardView: View {
                                         let icons = ["drop.fill", "cross.case.fill", "drop.fill"]
                                         
                                         Circle()
-                                            .fill(Color.white)
+                                            .fill(AppColor.cardLightGray)
                                             .frame(width: 36, height: 36)
                                             .shadow(color: Color.black.opacity(0.1), radius: 2)
                                             .overlay(
                                                 Image(systemName: icons[i])
-                                                    .foregroundColor(.red)
+                                                    .foregroundColor(AppColor.primaryRed)
                                                     .font(.system(size: 16))
                                             )
                                             .offset(x: CGFloat(positions[i].0 - 200), y: CGFloat(positions[i].1 - 90))
@@ -102,28 +102,12 @@ struct DashboardView: View {
                         }
                     }
                     
-                    // Action Buttons Grid
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 20), count: 3), spacing: 30) {
+                    // Action Buttons Grid using ActionButtonView component
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: 3), spacing: 20) {
                         ForEach(actions, id: \.0) { icon, title, color in
-                            VStack(spacing: 10) {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 70, height: 70)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
-                                    .overlay(
-                                        Image(systemName: icon)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 24, height: 24)
-                                            .foregroundColor(color)
-                                    )
-                                
-                                Text(title)
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.black)
-                                    .multilineTextAlignment(.center)
+                            ActionButtonView(icon: icon, title: title) {
+                                // Handle action
                             }
-                            .padding(.vertical, 5)
                             .opacity(isLoaded ? 1.0 : 0)
                             .animation(
                                 Animation.easeIn(duration: 0.3)
@@ -180,45 +164,45 @@ struct BloodSeekerCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Circle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(AppColor.cardLightGray)
                     .frame(width: 50, height: 50)
                     .overlay(
                         Image(systemName: "person.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .padding(5)
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColor.secondaryText)
                     )
                 
                 VStack(alignment: .leading) {
                     Text(seeker.name)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(AppColor.defaultText)
                     
                     Text(seeker.time)
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColor.secondaryText)
                 }
                 
                 Spacer()
                 
                 Text(seeker.bloodType)
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.red)
+                    .foregroundColor(AppColor.primaryRed)
             }
             
             Text(seeker.desc)
                 .font(.system(size: 14))
-                .foregroundColor(.gray)
+                .foregroundColor(AppColor.secondaryText)
                 .lineLimit(2)
                 .padding(.vertical, 5)
             
             HStack {
                 Image(systemName: "location.fill")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColor.secondaryText)
                 Text(seeker.location)
                     .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColor.secondaryText)
                 
                 Spacer()
                 
@@ -228,15 +212,15 @@ struct BloodSeekerCard: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 8)
-                        .background(Color.red)
+                        .background(AppColor.primaryRed)
                         .cornerRadius(20)
                 }
             }
         }
         .padding()
-        .background(Color.white)
+        .background(AppColor.cardLightGray)
         .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 2)
+        .shadow(color: AppColor.shadowColor, radius: 3, x: 0, y: 2)
     }
 }
 
