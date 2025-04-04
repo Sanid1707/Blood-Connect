@@ -12,6 +12,11 @@ struct AppColor {
     static let primaryRed     = Color(hex: "#E6014A")  // Bold red color
     static let textFieldGray  = Color(hex: "#F6F6F6")  // Light gray color
     static let defaultText    = Color.black            // Default text color
+    static let buttonDarkGray = Color(hex: "#666666")  // Medium gray for button backgrounds
+    static let cardLightGray  = Color(hex: "#F2F2F2")  // Light gray for card backgrounds
+    static let secondaryText  = Color(hex: "#757575")  // Gray for secondary text
+    static let dividerGray    = Color(hex: "#E0E0E0")  // Light gray for dividers
+    static let shadowColor    = Color.black.opacity(0.05) // Standard shadow color
 }
 
 extension Color {

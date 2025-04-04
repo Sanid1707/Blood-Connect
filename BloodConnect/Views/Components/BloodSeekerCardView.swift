@@ -13,77 +13,106 @@ struct BloodSeekerCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Circle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(AppColor.cardLightGray)
                     .frame(width: 50, height: 50)
                     .overlay(
                         Image(systemName: "person.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .padding(5)
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColor.secondaryText)
                     )
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppColor.defaultText)
                     
                     Text(timeAgo)
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColor.secondaryText)
                 }
                 
                 Spacer()
                 
-                Text(bloodType)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.red)
+                BloodDropComponent(bloodType: bloodType)
             }
             
             Text(description)
                 .font(.system(size: 14))
-                .foregroundColor(.gray)
+                .foregroundColor(AppColor.secondaryText)
                 .lineLimit(2)
             
             HStack {
-                Image(systemName: "location.fill")
-                    .foregroundColor(.gray)
-                Text(location)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                HStack(spacing: 4) {
+                    Image(systemName: "location.fill")
+                        .foregroundColor(AppColor.secondaryText)
+                    Text(location)
+                        .font(.system(size: 14))
+                        .foregroundColor(AppColor.secondaryText)
+                }
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.white)
+                )
                 
                 Spacer()
                 
                 Button(action: onDonate) {
-                    Text("Donate")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 8)
-                        .background(Color.red)
-                        .cornerRadius(20)
+                    HStack(spacing: 4) {
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 12))
+                        Text("Donate")
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(AppColor.primaryRed)
+                    .cornerRadius(20)
                 }
             }
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(16)
+        .background(AppColor.cardLightGray)
+        .cornerRadius(16)
+        .shadow(color: AppColor.shadowColor, radius: 8, x: 0, y: 2)
     }
 }
 
 struct BloodSeekerCardView_Previews: PreviewProvider {
     static var previews: some View {
-        BloodSeekerCardView(
-            name: "James Peterson",
-            description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
-            timeAgo: "5 Min Ago",
-            location: "London, England",
-            bloodType: "B+",
-            imageURL: "https://example.com/image.jpg"
-        ) {
-            print("Donate tapped")
+        ZStack {
+            Color.white.ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 16) {
+                    BloodSeekerCardView(
+                        name: "James Peterson",
+                        description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
+                        timeAgo: "5 Min Ago",
+                        location: "London, England",
+                        bloodType: "B+",
+                        imageURL: "https://example.com/image.jpg"
+                    ) {
+                        print("Donate tapped")
+                    }
+                    
+                    BloodSeekerCardView(
+                        name: "Sarah Johnson",
+                        description: "Urgently need blood donation for surgery scheduled tomorrow morning.",
+                        timeAgo: "30 Min Ago",
+                        location: "Manchester, UK",
+                        bloodType: "O-",
+                        imageURL: "https://example.com/image.jpg"
+                    ) {
+                        print("Donate tapped")
+                    }
+                }
+                .padding()
+            }
         }
-        .padding()
-        .background(Color.gray.opacity(0.1))
     }
 } 

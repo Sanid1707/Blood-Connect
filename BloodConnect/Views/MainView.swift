@@ -5,40 +5,44 @@ struct MainView: View {
     @Namespace private var animation
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Background color
-            Color.white.ignoresSafeArea()
-            
-            TabView(selection: $selectedTab) {
-                DashboardView()
-                    .tag(Tab.home)
-                    .transition(.slide)
+        NavigationView {
+            ZStack(alignment: .bottom) {
+                // Background color
+                Color.white.ignoresSafeArea()
                 
-                InboxView()
-                    .tag(Tab.inbox)
-                    .transition(.slide)
+                TabView(selection: $selectedTab) {
+                    DashboardView()
+                        .tag(Tab.home)
+                        .transition(.slide)
+                    
+                    InboxView()
+                        .tag(Tab.inbox)
+                        .transition(.slide)
+                    
+                    NotificationsView()
+                        .tag(Tab.notifications)
+                        .transition(.slide)
+                    
+                    ProfileView()
+                        .tag(Tab.profile)
+                        .transition(.slide)
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
-                NotificationsView()
-                    .tag(Tab.notifications)
-                    .transition(.slide)
-                
-                ProfileView()
-                    .tag(Tab.profile)
-                    .transition(.slide)
+                // Custom animated bottom navigation
+                VStack(spacing: 0) {
+                    Divider()
+                        .opacity(0.2)
+                    
+                    BottomNavigationView(selectedTab: $selectedTab)
+                        .background(Color.white)
+                }
+                .animation(.easeInOut, value: selectedTab)
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            
-            // Custom animated bottom navigation
-            VStack(spacing: 0) {
-                Divider()
-                    .opacity(0.2)
-                
-                BottomNavigationView(selectedTab: $selectedTab)
-                    .background(Color.white)
-            }
-            .animation(.easeInOut, value: selectedTab)
+            .ignoresSafeArea(edges: .bottom)
+            .navigationBarHidden(true)
         }
-        .ignoresSafeArea(edges: .bottom)
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
