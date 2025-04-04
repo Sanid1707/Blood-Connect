@@ -17,9 +17,9 @@ struct DashboardView: View {
     
     // Sample data directly in the view to avoid dependencies
     let bloodSeekers = [
-        (name: "James Peterson", desc: "I am anaemic and urgently need blood today.please reach out.Transportation and Feeding can be provided.", time: "5 Min Ago", location: "London, England", bloodType: "B+"),
-        (name: "Sarah Johnson", desc: "Urgently need blood donation for surgery scheduled tomorrow morning.", time: "30 Min Ago", location: "Manchester, UK", bloodType: "O-"),
-        (name: "Robert Williams", desc: "Need blood for emergency transfusion at City Hospital.", time: "1 Hour Ago", location: "Birmingham, UK", bloodType: "A+")
+        (name: "James Peterson", desc: "I am anaemic and urgently need blood today.please reach out.Transportation and Feeding can be provided.", time: "5 Min Ago", location: "London, England", bloodType: "B+", imageURL: "https://randomuser.me/api/portraits/men/23.jpg"),
+        (name: "Sarah Johnson", desc: "Urgently need blood donation for surgery scheduled tomorrow morning.", time: "30 Min Ago", location: "Manchester, UK", bloodType: "O-", imageURL: "https://randomuser.me/api/portraits/women/45.jpg"),
+        (name: "Robert Williams", desc: "Need blood for emergency transfusion at City Hospital.", time: "1 Hour Ago", location: "Birmingham, UK", bloodType: "A+", imageURL: "https://randomuser.me/api/portraits/men/76.jpg")
     ]
     
     var body: some View {
@@ -159,8 +159,18 @@ struct DashboardView: View {
                             .padding(.horizontal)
                             
                             ForEach(bloodSeekers, id: \.name) { seeker in
-                                BloodSeekerCard(seeker: seeker)
-                                    .padding(.horizontal)
+                                BloodSeekerCardView(
+                                    name: seeker.name,
+                                    description: seeker.desc,
+                                    timeAgo: seeker.time,
+                                    location: seeker.location,
+                                    bloodType: seeker.bloodType,
+                                    imageURL: seeker.imageURL,
+                                    onDonate: {
+                                        print("Donate tapped for \(seeker.name)")
+                                    }
+                                )
+                                .padding(.horizontal)
                             }
                         }
                     }
@@ -202,74 +212,6 @@ struct DashboardView: View {
         default:
             break
         }
-    }
-}
-
-// Extracted component for Blood Seeker Card
-struct BloodSeekerCard: View {
-    let seeker: (name: String, desc: String, time: String, location: String, bloodType: String)
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Circle()
-                    .fill(AppColor.cardLightGray)
-                    .frame(width: 50, height: 50)
-                    .overlay(
-                        Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(5)
-                            .foregroundColor(AppColor.secondaryText)
-                    )
-                
-                VStack(alignment: .leading) {
-                    Text(seeker.name)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(AppColor.defaultText)
-                    
-                    Text(seeker.time)
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.secondaryText)
-                }
-                
-                Spacer()
-                
-                Text(seeker.bloodType)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(AppColor.primaryRed)
-            }
-            
-            Text(seeker.desc)
-                .font(.system(size: 14))
-                .foregroundColor(AppColor.secondaryText)
-                .lineLimit(2)
-                .padding(.vertical, 5)
-            
-            HStack {
-                Image(systemName: "location.fill")
-                    .foregroundColor(AppColor.secondaryText)
-                Text(seeker.location)
-                    .font(.system(size: 14))
-                    .foregroundColor(AppColor.secondaryText)
-                
-                Spacer()
-                
-                Button(action: {}) {
-                    Text("Donate")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 8)
-                        .background(AppColor.primaryRed)
-                        .cornerRadius(20)
-                }
-            }
-        }
-        .padding()
-        .background(AppColor.cardLightGray)
-        .cornerRadius(15)
-        .shadow(color: AppColor.shadowColor, radius: 3, x: 0, y: 2)
     }
 }
 
