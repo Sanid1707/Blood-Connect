@@ -10,29 +10,22 @@ struct ActionButtonView: View {
             VStack(spacing: 8) {
                 Circle()
                     .fill(AppColor.cardLightGray)
-                    .frame(width: 60, height: 60)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                    .frame(width: 55, height: 55)
                     .overlay(
                         Image(systemName: icon)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 24, height: 24)
+                            .frame(width: 22, height: 22)
                             .foregroundColor(AppColor.primaryRed)
                     )
                 
                 Text(title)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11))
                     .foregroundColor(AppColor.defaultText)
                     .multilineTextAlignment(.center)
             }
-            .padding(.vertical, 8)
-            .frame(width: 90)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
-            )
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -42,18 +35,27 @@ struct ActionButtonView_Previews: PreviewProvider {
             Color.white.ignoresSafeArea()
             
             VStack(spacing: 20) {
-                ActionButtonView(
-                    icon: "drop.fill",
-                    title: "Find Donors"
-                ) {
-                    print("Button tapped")
-                }
-                
-                ActionButtonView(
-                    icon: "heart.fill",
-                    title: "Donate"
-                ) {
-                    print("Button tapped")
+                HStack(spacing: 20) {
+                    ActionButtonView(
+                        icon: "drop.fill",
+                        title: "Find Donors"
+                    ) {
+                        print("Button tapped")
+                    }
+                    
+                    ActionButtonView(
+                        icon: "heart.fill",
+                        title: "Donate"
+                    ) {
+                        print("Button tapped")
+                    }
+                    
+                    ActionButtonView(
+                        icon: "cross.case.fill",
+                        title: "Blood Bank"
+                    ) {
+                        print("Button tapped")
+                    }
                 }
             }
             .padding()
