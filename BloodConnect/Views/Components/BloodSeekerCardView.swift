@@ -35,15 +35,7 @@ struct BloodSeekerCardView: View {
                 
                 Spacer()
                 
-                Text(bloodType)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(AppColor.primaryRed)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white)
-                    )
+                BloodDropComponent(bloodType: bloodType)
             }
             
             Text(description)
