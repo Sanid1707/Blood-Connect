@@ -23,33 +23,14 @@ struct DashboardView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom Navigation Bar
-            HStack {
-                Button(action: {}) {
-                    Image(systemName: "line.horizontal.3")
-                        .font(.system(size: 20))
-                        .foregroundColor(.black)
+            // Using the new TopBarView component
+            TopBarView(
+                title: "Blood Connect",
+                showBackButton: false,
+                onSettingsTapped: {
+                    // Handle settings action
                 }
-                
-                Spacer()
-                
-                Text("Blood Connect")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(AppColor.primaryRed)
-                
-                Spacer()
-                
-                Button(action: {}) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.black)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
-            .background(Color.white)
-            .shadow(color: Color.black.opacity(0.05), radius: 2, y: 2)
+            )
             
             ScrollView {
                 VStack(spacing: 20) {
