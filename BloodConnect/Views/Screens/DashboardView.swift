@@ -4,6 +4,7 @@ struct DashboardView: View {
     @State private var searchText = ""
     @State private var isLoaded = false
     @State private var showFindDonorsView = false
+    @State private var showDonateView = false
     
     // Ensure we have simple data that doesn't rely on external models
     let actions = [
@@ -192,6 +193,12 @@ struct DashboardView: View {
                 isActive: $showFindDonorsView,
                 label: { EmptyView() }
             )
+            
+            NavigationLink(
+                destination: DonateView(),
+                isActive: $showDonateView,
+                label: { EmptyView() }
+            )
         }
     }
     
@@ -200,7 +207,7 @@ struct DashboardView: View {
         case 0: // Find Donors
             showFindDonorsView = true
         case 1: // Donate
-            print("Donate tapped")
+            showDonateView = true
         case 2: // Blood Bank
             print("Blood Bank tapped")
         case 3: // Support

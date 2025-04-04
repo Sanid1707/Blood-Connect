@@ -12,16 +12,7 @@ struct BloodSeekerCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Circle()
-                    .fill(AppColor.cardLightGray)
-                    .frame(width: 50, height: 50)
-                    .overlay(
-                        Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(5)
-                            .foregroundColor(AppColor.secondaryText)
-                    )
+                SafeImageView(imageURL: imageURL)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
@@ -82,6 +73,23 @@ struct BloodSeekerCardView: View {
     }
 }
 
+struct SafeImageView: View {
+    let imageURL: String
+    
+    var body: some View {
+        Circle()
+            .fill(AppColor.cardLightGray)
+            .frame(width: 50, height: 50)
+            .overlay(
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(5)
+                    .foregroundColor(AppColor.secondaryText)
+            )
+    }
+}
+
 struct BloodSeekerCardView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
@@ -95,7 +103,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                         timeAgo: "5 Min Ago",
                         location: "London, England",
                         bloodType: "B+",
-                        imageURL: "https://example.com/image.jpg"
+                        imageURL: ""
                     ) {
                         print("Donate tapped")
                     }
@@ -106,7 +114,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                         timeAgo: "30 Min Ago",
                         location: "Manchester, UK",
                         bloodType: "O-",
-                        imageURL: "https://example.com/image.jpg"
+                        imageURL: ""
                     ) {
                         print("Donate tapped")
                     }
