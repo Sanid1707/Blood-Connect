@@ -8,15 +8,16 @@
 import Foundation
 
 struct User: Identifiable, Codable {
-    let id: String
+    let id: String?
     let email: String
     let name: String
     let phoneNumber: String?
     let bloodType: BloodType?
     let lastDonationDate: Date?
     let donationCount: Int
+    let country: String?
     
-    init(id: String, email: String, name: String, phoneNumber: String? = nil, bloodType: BloodType? = nil, lastDonationDate: Date? = nil, donationCount: Int = 0) {
+    init(id: String?=nil, email: String, name: String, phoneNumber: String? = nil, bloodType: BloodType? = nil, lastDonationDate: Date? = nil, donationCount: Int = 0,country:String?=nil) {
         self.id = id
         self.email = email
         self.name = name
@@ -24,6 +25,7 @@ struct User: Identifiable, Codable {
         self.bloodType = bloodType
         self.lastDonationDate = lastDonationDate
         self.donationCount = donationCount
+        self.country = country
     }
 }
 
