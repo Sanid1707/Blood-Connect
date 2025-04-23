@@ -18,7 +18,7 @@ struct PostBloodRequestView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Header
                 HStack {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "arrow.left")
                         .foregroundColor(.black)
                     Spacer()
                     Text("Post A Request")
@@ -31,8 +31,10 @@ struct PostBloodRequestView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Select Patient Name")
                         .font(.subheadline)
+                        .fontWeight(.semibold)
                     TextField("Patient Name", text: $patientName)
                         .padding(.horizontal,40)
+                        .padding(.vertical,15)
                         .background(Color(UIColor.systemGray6))
                         .cornerRadius(10)
                         .overlay(
@@ -40,13 +42,14 @@ struct PostBloodRequestView: View {
                                 Image(systemName: "person")
                                 Spacer()
                             }
-                            .padding(.horizontal, 2)
+                            .padding(.horizontal, 10)
                             .foregroundColor(.gray)
                         )
                 }
 
                 // Blood Group
                 Text("Select Blood Group")
+                    .fontWeight(.semibold)
                     .font(.subheadline)
 
                 LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 12) {
@@ -57,12 +60,12 @@ struct PostBloodRequestView: View {
                             Text(group)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(selectedBloodType == group ? Color(red: 230/255, green: 4/255, blue: 73/255).opacity(0.2) : Color(UIColor.systemGray5))
+                                .background(selectedBloodType == group ? AppColor.primaryRed.opacity(0.2) : Color(UIColor.systemGray5))
                                 .foregroundColor(.black)
                                 .cornerRadius(50)
                                 .overlay(
                                     Circle()
-                                        .stroke(selectedBloodType == group ? Color(red: 230/255, green: 4/255, blue: 73/255): Color.clear, lineWidth: 2)
+                                        .stroke(selectedBloodType == group ? AppColor.primaryRed: Color.clear, lineWidth: 2)
                                 )
                         }
                     }
@@ -71,6 +74,7 @@ struct PostBloodRequestView: View {
                 // Blood Unit
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Select Blood Unit")
+                        .fontWeight(.semibold)
                     Slider(value: $bloodUnit, in: 1...10, step: 1)
                         .accentColor(Color(red: 230/255, green: 4/255, blue: 73/255))
                     Text("\(Int(bloodUnit)) Unit")
@@ -80,7 +84,9 @@ struct PostBloodRequestView: View {
 
                 // Mobile Number
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Select Blood Unit") // typo as in original UI — you can change to "Enter Mobile Number"
+                    Text("Enter Mobile Number")
+                        .fontWeight(.semibold)
+                        .padding(.vertical,15)
                     TextField("Mobile Number", text: $mobileNumber)
                         .keyboardType(.phonePad)
                         .padding()
@@ -91,6 +97,8 @@ struct PostBloodRequestView: View {
                 // Location Picker
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Select A Location")
+                        .fontWeight(.semibold)
+                        
                     Picker("Select A Location", selection: $selectedLocation) {
                         Text("Select A Location").tag("")
                         ForEach(locations, id: \.self) { location in
@@ -99,7 +107,7 @@ struct PostBloodRequestView: View {
                     }
                     .pickerStyle(MenuPickerStyle())
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding(.vertical,10)
                     .background(Color(UIColor.systemGray6))
                     .cornerRadius(10)
                 }
@@ -108,6 +116,7 @@ struct PostBloodRequestView: View {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading) {
                         Text("Gender")
+                            .fontWeight(.semibold)
                         Picker("Gender", selection: $gender) {
                             Text("Gender").tag("")
                             ForEach(genders, id: \.self) { g in
@@ -116,17 +125,18 @@ struct PostBloodRequestView: View {
                         }
                         .pickerStyle(MenuPickerStyle())
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.vertical,10)
                         .background(Color(UIColor.systemGray6))
                         .cornerRadius(10)
                     }
 
                     VStack(alignment: .leading) {
                         Text("Date")
+                            .fontWeight(.semibold)
                         DatePicker("", selection: $birthDate, displayedComponents: .date)
                             .labelsHidden()
                             .frame(maxWidth: .infinity)
-                            .padding()
+                            .padding(.vertical,10)
                             .background(Color(UIColor.systemGray6))
                             .cornerRadius(10)
                     }
@@ -138,9 +148,10 @@ struct PostBloodRequestView: View {
                 }) {
                     Text("Send Request")
                         .foregroundColor(.white)
+                        .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                        .background(AppColor.primaryRed)
                         .cornerRadius(12)
                 }
 

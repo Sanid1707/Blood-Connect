@@ -47,7 +47,7 @@ struct WelcomeView: View {
                             .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .background(AppColor.primaryRed)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
@@ -61,9 +61,9 @@ struct WelcomeView: View {
                             .padding()
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color(red: 230/255, green: 4/255, blue: 73/255), lineWidth: 1.5)
+                                    .stroke(AppColor.primaryRed, lineWidth: 1.5)
                             )
-                            .foregroundColor(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .foregroundColor(AppColor.primaryRed)
                     }
                 }
                 .padding(.horizontal, 30)

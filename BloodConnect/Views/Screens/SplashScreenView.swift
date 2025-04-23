@@ -11,7 +11,7 @@ struct SplashScreenView: View {
     var body: some View {
             ZStack {
                 // Background Color
-                Color(red: 230/255, green: 4/255, blue: 73/255)
+                AppColor.primaryRed
                     .edgesIgnoringSafeArea(.all)
                 
                 VStack {

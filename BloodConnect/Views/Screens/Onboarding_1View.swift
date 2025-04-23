@@ -47,7 +47,7 @@ struct Onboarding_1View: View {
                     
                     HStack(spacing: 8) {
                         Circle()
-                            .fill(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .fill(AppColor.primaryRed)
                             .frame(width: 8, height: 8)
                         
                         Circle()
@@ -65,7 +65,7 @@ struct Onboarding_1View: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color(red: 230/255, green: 4/255, blue: 73/255))
+                                .fill(AppColor.primaryRed)
                                 .frame(width: 50, height: 50)
                             
                             Image(systemName: "arrow.right")

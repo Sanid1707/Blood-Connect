@@ -123,7 +123,7 @@ struct SignUpView: View {
                         viewModel.agreedToTerms.toggle()
                     }) {
                         Image(systemName: viewModel.agreedToTerms ? "checkmark.square.fill" : "square")
-                            .foregroundColor(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .foregroundColor(AppColor.primaryRed)
                     }
 
                     Text("I agree to the terms & conditions")
@@ -140,14 +140,14 @@ struct SignUpView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .background(AppColor.primaryRed)
                             .cornerRadius(10)
                     } else {
                         Text("Sign Up")
                             .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .background(AppColor.primaryRed)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
@@ -201,7 +201,7 @@ struct SignUpView: View {
                         viewModel.goToSignIn()
                     }) {
                         Text("Sign In")
-                            .foregroundColor(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .foregroundColor(AppColor.primaryRed)
                             .fontWeight(.semibold)
                     }
                 }
