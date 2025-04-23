@@ -167,29 +167,36 @@ struct SignUpView: View {
                 }
 
                 // Social Buttons
-                HStack(spacing: 20) {
-                    Button(action: {
-                        viewModel.signInWithGoogle()
-                    }) {
-                        Image("google-icon") // Add to Assets
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                    }
+                VStack {
+                    HStack(spacing: 10) {
+                        Button(action: {
+                            viewModel.signInWithGoogle()
+                        }) {
+                            Image("google-icon")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
 
-                    Button(action: {
-                        viewModel.signInWithApple()
-                    }) {
-                        Image("facebook-icon") // Add to Assets
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                        Button(action: {
+                            viewModel.signInWithApple()
+                        }) {
+                            Image("facebook-icon")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
                     }
+                    .frame(maxWidth: .infinity) // Stretch to fill available width
+                    .multilineTextAlignment(.center) // Optional if you're using text
+                    .padding()
+                    .background(Color.clear) // Optional
                 }
+
 
                 // Sign In Footer
                 HStack(spacing: 4) {
