@@ -13,7 +13,7 @@ struct TopBarView: View {
                 Button(action: {
                     onBackTapped?()
                 }) {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "arrow.left")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.black)
                 }

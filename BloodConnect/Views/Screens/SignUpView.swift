@@ -123,7 +123,7 @@ struct SignUpView: View {
                         viewModel.agreedToTerms.toggle()
                     }) {
                         Image(systemName: viewModel.agreedToTerms ? "checkmark.square.fill" : "square")
-                            .foregroundColor(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .foregroundColor(AppColor.primaryRed)
                     }
 
                     Text("I agree to the terms & conditions")
@@ -140,14 +140,14 @@ struct SignUpView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .background(AppColor.primaryRed)
                             .cornerRadius(10)
                     } else {
                         Text("Sign Up")
                             .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .background(AppColor.primaryRed)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
@@ -167,29 +167,36 @@ struct SignUpView: View {
                 }
 
                 // Social Buttons
-                HStack(spacing: 20) {
-                    Button(action: {
-                        viewModel.signInWithGoogle()
-                    }) {
-                        Image("google-icon") // Add to Assets
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                    }
+                VStack {
+                    HStack(spacing: 10) {
+                        Button(action: {
+                            viewModel.signInWithGoogle()
+                        }) {
+                            Image("google-icon")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
 
-                    Button(action: {
-                        viewModel.signInWithApple()
-                    }) {
-                        Image("facebook-icon") // Add to Assets
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                        Button(action: {
+                            viewModel.signInWithApple()
+                        }) {
+                            Image("facebook-icon")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
                     }
+                    .frame(maxWidth: .infinity) // Stretch to fill available width
+                    .multilineTextAlignment(.center) // Optional if you're using text
+                    .padding()
+                    .background(Color.clear) // Optional
                 }
+
 
                 // Sign In Footer
                 HStack(spacing: 4) {
@@ -201,7 +208,7 @@ struct SignUpView: View {
                         viewModel.goToSignIn()
                     }) {
                         Text("Sign In")
-                            .foregroundColor(Color(red: 230/255, green: 4/255, blue: 73/255))
+                            .foregroundColor(AppColor.primaryRed)
                             .fontWeight(.semibold)
                     }
                 }
