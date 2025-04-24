@@ -3,6 +3,7 @@ import Combine
 import SwiftData
 
 // MARK: - Data Service Protocol
+@preconcurrency
 protocol DataServiceProtocol {
     // User operations
     func createUser(_ user: User) -> AnyPublisher<User, Error>
@@ -35,6 +36,7 @@ enum DataServiceError: Error {
 
 // MARK: - SwiftData Implementation
 @MainActor
+@preconcurrency
 class SwiftDataService: DataServiceProtocol {
     private var modelContext: ModelContext
     
@@ -43,7 +45,8 @@ class SwiftDataService: DataServiceProtocol {
         if let modelContext = modelContext {
             self.modelContext = modelContext
         } else {
-            // Since DatabaseManager is @MainActor, we need to access it on the main thread
+            // Since DatabaseManager is @MainActor and we're in a @MainActor class,
+            // we can directly access it without Task/await
             self.modelContext = DatabaseManager.shared.mainContext
         }
     }

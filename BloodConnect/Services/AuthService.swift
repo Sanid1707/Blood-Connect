@@ -22,8 +22,8 @@ enum AuthError: Error {
 class AuthService {
     // MARK: - Properties
     private let networkManager: NetworkManager
-    private let keychainService: KeychainService
-    private let dataService: DataServiceProtocol
+    internal let keychainService: KeychainService
+    internal let dataService: DataServiceProtocol
     
     // MARK: - Initialization
     init(networkManager: NetworkManager = NetworkManager(),
