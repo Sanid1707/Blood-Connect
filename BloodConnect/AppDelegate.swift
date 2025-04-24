@@ -54,9 +54,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     @MainActor
     private func setupServices() {
-        // Initialize database
-        _ = DatabaseManager.shared
-        DatabaseManager.shared.prepareDatabase()
+        // Initialize database and provide visual feedback if there was recovery
+        print("Initializing BloodConnect database...")
+        let databaseManager = DatabaseManager.shared
+        
+        // Log the database path
+        printDatabaseLocation()
+        
+        // Prepare database (migrations, etc.)
+        databaseManager.prepareDatabase()
         
         // Log successful initialization
         print("BloodConnect services initialized successfully")

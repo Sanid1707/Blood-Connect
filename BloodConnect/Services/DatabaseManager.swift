@@ -17,7 +17,17 @@ class DatabaseManager {
             self.modelContainer = try Self.createModelContainer()
             self.mainContext = modelContainer.mainContext
         } catch {
-            fatalError("Failed to initialize database: \(error)")
+            print("Error initializing database: \(error)")
+            print("Attempting to recover by resetting the database...")
+            
+            // Try to recover by destroying and recreating the database
+            if let recoveredContainer = try? Self.recoverModelContainer() {
+                self.modelContainer = recoveredContainer
+                self.mainContext = recoveredContainer.mainContext
+                print("Database recovery successful")
+            } else {
+                fatalError("Failed to initialize database: \(error)")
+            }
         }
     }
     
@@ -41,6 +51,23 @@ class DatabaseManager {
             for: schema,
             configurations: [modelConfiguration]
         )
+    }
+    
+    // Recovery method for database initialization failures
+    private static func recoverModelContainer() throws -> ModelContainer {
+        // Get URL for the default SwiftData store
+        let fileManager = FileManager.default
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let storeURL = appSupport.appendingPathComponent("default.store")
+        
+        // Remove the existing store if it exists
+        if fileManager.fileExists(atPath: storeURL.path) {
+            try fileManager.removeItem(at: storeURL)
+            print("Removed existing database at \(storeURL.path)")
+        }
+        
+        // Recreate the model container with a fresh database
+        return try createModelContainer()
     }
     
     // MARK: - Context Methods
