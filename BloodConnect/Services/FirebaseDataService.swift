@@ -114,8 +114,8 @@ class FirebaseDataService {
             userData["lastDonationDate"] = Timestamp(date: lastDonationDate)
         }
         
-        if let country = user.country {
-            userData["country"] = country
+        if let county = user.county {
+            userData["county"] = county
         }
         
         return userData
@@ -148,6 +148,38 @@ class FirebaseDataService {
         
         try modelContext.save()
     }
+    func fetchAllUsers() async throws -> [User] {
+        let snapshot = try await db.collection("users").getDocuments()
+        return snapshot.documents.compactMap { doc in
+            let data = doc.data()
+            let id = doc.documentID
+            let email = data["email"] as? String ?? ""
+            let name = data["name"] as? String ?? ""
+            let userType = data["userType"] as? String ?? "Donor"
+            let lat = data["latitude"] as? Double
+            let lon = data["longitude"] as? Double
+
+            guard let latitude = lat, let longitude = lon else { return nil }
+
+            return User(
+                id: id,
+                email: email,
+                name: name,
+                phoneNumber: data["phoneNumber"] as? String,
+                bloodType: data["bloodType"] != nil ? BloodType(rawValue: data["bloodType"] as! String) : nil,
+                lastDonationDate: nil,
+                donationCount: data["donationCount"] as? Int ?? 0,
+                county: data["county"] as? String,
+                userType: userType,
+                workingHours: data["workingHours"] as? String,
+                availability: data["availability"] as? String,
+                address: data["address"] as? String,
+                latitude: latitude,
+                longitude: longitude
+            )
+        }
+    }
+
     
     private func updateUserModelFromFirestore(_ user: UserModel, data: [String: Any]) {
         // Update user properties from Firestore data
@@ -175,9 +207,10 @@ class FirebaseDataService {
             user.lastDonationDate = timestamp.dateValue()
         }
         
-        if let country = data["country"] as? String {
-            user.country = country
+        if let county = data["county"] as? String {
+            user.county = county
         }
+        
     }
     
     private func createUserModelFromFirestore(documentId: String, data: [String: Any]) {
@@ -186,7 +219,13 @@ class FirebaseDataService {
         let phoneNumber = data["phoneNumber"] as? String
         let bloodType = data["bloodType"] as? String
         let donationCount = data["donationCount"] as? Int ?? 0
-        let country = data["country"] as? String
+        let county = data["county"] as? String
+        let userType = data["userType"] as? String ?? "Donor"
+        let workingHours = data["workingHours"] as? String
+        let availability = data["availability"] as? String
+        let address = data["address"] as? String
+        let latitude = data["latitude"] as? Double
+        let longitude = data["longitude"] as? Double
         
         var lastDonationDate: Date? = nil
         if let timestamp = data["lastDonationDate"] as? Timestamp {
@@ -208,7 +247,13 @@ class FirebaseDataService {
             bloodType: bloodType,
             lastDonationDate: lastDonationDate,
             donationCount: donationCount,
-            country: country
+            county: county,
+            userType : userType,
+            workingHours : workingHours,
+            availability : availability,
+            address :  address,
+            latitude: latitude,
+            longitude: longitude
         )
         
         // Set createdAt manually since we want to use the server timestamp
@@ -405,3 +450,8 @@ class FirebaseDataService {
         print("Donation centers retrieval would be implemented here")
     }
 } 
+
+
+extension FirebaseDataService {
+    static let shared = FirebaseDataService()
+}

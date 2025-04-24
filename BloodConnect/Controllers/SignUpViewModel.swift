@@ -1,6 +1,14 @@
 import SwiftUI
 import Combine
 
+
+enum UserType: String, CaseIterable, Identifiable {
+    var id: String { rawValue }
+    
+    case donor = "Donor"
+    case center = "Donation Center"
+}
+
 @MainActor
 class SignUpViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -9,12 +17,18 @@ class SignUpViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var showPassword: Bool = false
     @Published var bloodType: BloodType = .bPositive
-    @Published var country: String = ""
+    @Published var county: String = ""
     @Published var agreedToTerms: Bool = false
     @Published var isLoading: Bool = false
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = ""
     @Published var isAuthenticated: Bool = false
+    @Published var userType: UserType = .donor
+    @Published var workingHours: String = ""
+    @Published var availability: String = ""
+    @Published var address: String = ""
+    @Published var latitude: Double?
+    @Published var longitude: Double?
 
     // MARK: - Private
     private let controller: SignUpViewController
@@ -57,8 +71,8 @@ class SignUpViewModel: ObservableObject {
             return
         }
 
-        guard !country.isEmpty else {
-            showAlertWith("Please select your country.")
+        guard !county.isEmpty else {
+            showAlertWith("Please select your county.")
             return
         }
 
@@ -66,7 +80,23 @@ class SignUpViewModel: ObservableObject {
             showAlertWith("Please agree to the terms and conditions.")
             return
         }
+        
+        if userType == .donor {
+                   guard !availability.isEmpty else {
+                       showAlertWith("Please enter your availability.")
+                       return
+                   }
+               } else {
+                   guard !workingHours.isEmpty else {
+                       showAlertWith("Please enter the center's working hours.")
+                       return
+                   }
 
+                   guard !address.isEmpty else {
+                       showAlertWith("Please enter the center's address.")
+                       return
+                   }
+               }
         isLoading = true
         
         Task {
@@ -75,7 +105,11 @@ class SignUpViewModel: ObservableObject {
                 email: email,
                 password: password,
                 bloodType: bloodType.rawValue,
-                country: country
+                county: county,
+                userType: userType.rawValue,
+                availability: userType == .donor ? availability : nil,
+                workingHours: userType == .center ? workingHours : nil,
+                address: userType == .center ? address : nil
             )
             
             publisher

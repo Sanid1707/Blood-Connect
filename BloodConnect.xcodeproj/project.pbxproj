@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D075971F2DB9C5120080919C /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D075971E2DB9C5120080919C /* FirebaseAuth */; };
-		D07597212DB9C5120080919C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D07597202DB9C5120080919C /* FirebaseFirestore */; };
-		D07597232DB9C5120080919C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = D07597222DB9C5120080919C /* FirebaseStorage */; };
+		3F305F5C2DBA894500750233 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F305F5B2DBA894500750233 /* FirebaseAuth */; };
+		3F305F5E2DBA894500750233 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 3F305F5D2DBA894500750233 /* FirebaseDatabase */; };
+		3F305F602DBA894500750233 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F305F5F2DBA894500750233 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,9 +71,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D075971F2DB9C5120080919C /* FirebaseAuth in Frameworks */,
-				D07597212DB9C5120080919C /* FirebaseFirestore in Frameworks */,
-				D07597232DB9C5120080919C /* FirebaseStorage in Frameworks */,
+				3F305F5E2DBA894500750233 /* FirebaseDatabase in Frameworks */,
+				3F305F5C2DBA894500750233 /* FirebaseAuth in Frameworks */,
+				3F305F602DBA894500750233 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,9 +134,9 @@
 			);
 			name = BloodConnect;
 			packageProductDependencies = (
-				D075971E2DB9C5120080919C /* FirebaseAuth */,
-				D07597202DB9C5120080919C /* FirebaseFirestore */,
-				D07597222DB9C5120080919C /* FirebaseStorage */,
+				3F305F5B2DBA894500750233 /* FirebaseAuth */,
+				3F305F5D2DBA894500750233 /* FirebaseDatabase */,
+				3F305F5F2DBA894500750233 /* FirebaseFirestore */,
 			);
 			productName = BloodConnect;
 			productReference = D0C5B7032D844E5600380137 /* BloodConnect.app */;
@@ -221,7 +221,7 @@
 			mainGroup = D0C5B6FA2D844E5600380137;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D075971D2DB9C5120080919C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3F305F5A2DBA894500750233 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C5B7042D844E5600380137 /* Products */;
@@ -308,6 +308,7 @@
 				DEVELOPMENT_TEAM = WJ2XQX9J3D;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BloodConnect/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby donors and donation centers.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -337,6 +338,7 @@
 				DEVELOPMENT_TEAM = WJ2XQX9J3D;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BloodConnect/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show nearby donors and donation centers.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -588,9 +590,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		D075971D2DB9C5120080919C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		3F305F5A2DBA894500750233 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 11.12.0;
@@ -599,20 +601,20 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D075971E2DB9C5120080919C /* FirebaseAuth */ = {
+		3F305F5B2DBA894500750233 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D075971D2DB9C5120080919C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = 3F305F5A2DBA894500750233 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
 		};
-		D07597202DB9C5120080919C /* FirebaseFirestore */ = {
+		3F305F5D2DBA894500750233 /* FirebaseDatabase */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D075971D2DB9C5120080919C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
+			package = 3F305F5A2DBA894500750233 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
-		D07597222DB9C5120080919C /* FirebaseStorage */ = {
+		3F305F5F2DBA894500750233 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D075971D2DB9C5120080919C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
+			package = 3F305F5A2DBA894500750233 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
