@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 class LoginViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var email: String = ""
@@ -16,89 +17,142 @@ class LoginViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = ""
+    @Published var isAuthenticated: Bool = false
     
     // MARK: - Private Properties
     private let controller: LoginViewController
+    private let userDefaultsService: UserDefaultsService
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
-    init(controller: LoginViewController = LoginViewController()) {
-        self.controller = controller
+    init(controller: LoginViewController? = nil,
+         userDefaultsService: UserDefaultsService = UserDefaultsService.shared) {
+        if let controller = controller {
+            self.controller = controller
+        } else {
+            self.controller = LoginViewController()
+        }
+        
+        self.userDefaultsService = userDefaultsService
+        
+        // Load saved email if "Remember Me" was checked
+        self.rememberMe = userDefaultsService.rememberMe
+        if rememberMe, let savedEmail = userDefaultsService.savedEmail {
+            self.email = savedEmail
+        }
+        
+        // Check if already authenticated
+        Task {
+            if self.controller.isAuthenticated() {
+                self.isAuthenticated = true
+            }
+        }
     }
     
     // MARK: - Public Methods
     func signIn() {
         isLoading = true
         
-        controller.signIn(email: email, password: password)
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    
-                    if case .failure(let error) = completion {
-                        self?.showAlert = true
-                        self?.alertMessage = error.localizedDescription
-                    }
-                },
-                receiveValue: { [weak self] user in
-                    self?.isLoading = false
-                    // Handle successful login
-                    print("User logged in: \(user.name)")
-                    
-                    // Save user credentials if remember me is checked
-                    if self?.rememberMe == true {
-                        self?.saveCredentials()
-                    }
-                }
-            )
-            .store(in: &cancellables)
+        Task {
+            do {
+                let publisher = controller.signIn(email: email, password: password)
+                
+                publisher
+                    .receive(on: DispatchQueue.main)
+                    .sink(
+                        receiveCompletion: { [weak self] completion in
+                            self?.isLoading = false
+                            
+                            if case .failure(let error) = completion {
+                                self?.showAlert = true
+                                self?.alertMessage = error.localizedDescription
+                            }
+                        },
+                        receiveValue: { [weak self] user in
+                            self?.isLoading = false
+                            // Handle successful login
+                            print("User logged in: \(user.name)")
+                            
+                            // Save user credentials if remember me is checked
+                            if let self = self {
+                                if self.rememberMe {
+                                    self.saveCredentials()
+                                } else {
+                                    self.userDefaultsService.clearLoginCredentials()
+                                }
+                            }
+                            
+                            self?.isAuthenticated = true
+                            
+                            // Notify the parent AuthViewModel that we're authenticated
+                            if let authViewModel = self?.getAuthViewModel() {
+                                authViewModel.authenticate()
+                            }
+                        }
+                    )
+                    .store(in: &cancellables)
+            } catch {
+                self.isLoading = false
+                self.showAlert = true
+                self.alertMessage = error.localizedDescription
+            }
+        }
     }
     
     func signInWithGoogle() {
         isLoading = true
         
-        controller.signInWithGoogle()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    
-                    if case .failure(let error) = completion {
-                        self?.showAlert = true
-                        self?.alertMessage = error.localizedDescription
+        Task {
+            let publisher = controller.signInWithGoogle()
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        
+                        if case .failure(let error) = completion {
+                            self?.showAlert = true
+                            self?.alertMessage = error.localizedDescription
+                        }
+                    },
+                    receiveValue: { [weak self] user in
+                        self?.isLoading = false
+                        // Handle successful Google login
+                        print("User logged in with Google: \(user.name)")
+                        self?.isAuthenticated = true
                     }
-                },
-                receiveValue: { [weak self] user in
-                    self?.isLoading = false
-                    // Handle successful Google login
-                    print("User logged in with Google: \(user.name)")
-                }
-            )
-            .store(in: &cancellables)
+                )
+                .store(in: &cancellables)
+        }
     }
     
     func signInWithApple() {
         isLoading = true
         
-        controller.signInWithApple()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    
-                    if case .failure(let error) = completion {
-                        self?.showAlert = true
-                        self?.alertMessage = error.localizedDescription
+        Task {
+            let publisher = controller.signInWithApple()
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        
+                        if case .failure(let error) = completion {
+                            self?.showAlert = true
+                            self?.alertMessage = error.localizedDescription
+                        }
+                    },
+                    receiveValue: { [weak self] user in
+                        self?.isLoading = false
+                        // Handle successful Apple login
+                        print("User logged in with Apple: \(user.name)")
+                        self?.isAuthenticated = true
                     }
-                },
-                receiveValue: { [weak self] user in
-                    self?.isLoading = false
-                    // Handle successful Apple login
-                    print("User logged in with Apple: \(user.name)")
-                }
-            )
-            .store(in: &cancellables)
+                )
+                .store(in: &cancellables)
+        }
     }
     
     func forgotPassword() {
@@ -110,28 +164,32 @@ class LoginViewModel: ObservableObject {
         
         isLoading = true
         
-        controller.resetPassword(email: email)
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    
-                    if case .failure(let error) = completion {
+        Task {
+            let publisher = controller.resetPassword(email: email)
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        
+                        if case .failure(let error) = completion {
+                            self?.showAlert = true
+                            self?.alertMessage = error.localizedDescription
+                        }
+                    },
+                    receiveValue: { [weak self] _ in
+                        self?.isLoading = false
                         self?.showAlert = true
-                        self?.alertMessage = error.localizedDescription
+                        self?.alertMessage = "Password reset instructions have been sent to your email"
                     }
-                },
-                receiveValue: { [weak self] _ in
-                    self?.isLoading = false
-                    self?.showAlert = true
-                    self?.alertMessage = "Password reset instructions have been sent to your email"
-                }
-            )
-            .store(in: &cancellables)
+                )
+                .store(in: &cancellables)
+        }
     }
     
     func goToSignUp() {
-        // Navigate to sign up screen
+        // This will be handled by the parent AuthView
         print("Navigate to sign up")
     }
     
@@ -140,9 +198,29 @@ class LoginViewModel: ObservableObject {
         print("Navigate back")
     }
     
+    func signOut() {
+        Task {
+            controller.authService.signOut()
+            isAuthenticated = false
+        }
+    }
+    
     // MARK: - Private Methods
     private func saveCredentials() {
-        // Save credentials to UserDefaults or Keychain
-        print("Saving credentials for \(email)")
+        userDefaultsService.saveLoginCredentials(email: email)
+    }
+    
+    // MARK: - Helper methods
+    
+    func setAuthViewModel(_ authViewModel: AuthViewModel) {
+        // This allows the view to pass its EnvironmentObject to the view model
+        _authViewModel = authViewModel
+    }
+    
+    // Reference to the parent AuthViewModel
+    private var _authViewModel: AuthViewModel?
+    
+    private func getAuthViewModel() -> AuthViewModel? {
+        return _authViewModel
     }
 }

@@ -1,61 +1,63 @@
+//
+//  SignUpViewController.swift
+//  BloodConnect
+//
+//  Created by Sanidhya Pandey on 14/03/2025.
+//
+
 import Foundation
 import Combine
 
-class SignUpViewController: SignUpHandling {
+@MainActor
+class SignUpViewController {
+    // MARK: - Properties
+    let authService: AuthService
     
-    func signUp(name: String, email: String, password: String, bloodType: String, country: String) -> AnyPublisher<User, Error> {
-        // Simulate a successful sign-up response with mock data
-        let user = User(
-            id: UUID().uuidString,
-            email: email,
-            name: name,
-            phoneNumber: nil,
-            bloodType: BloodType(rawValue: bloodType),
-            lastDonationDate: nil,
-            donationCount: 0,
-            country: country
-        )
-        
-        return Just(user)
-            .setFailureType(to: Error.self)
-            .delay(for: 1.5, scheduler: DispatchQueue.main)
-            .eraseToAnyPublisher()
+    // MARK: - Initialization
+    init(authService: AuthService? = nil) {
+        if let authService = authService {
+            self.authService = authService
+        } else {
+            self.authService = AuthService()
+        }
     }
-
+    
+    // MARK: - Authentication Methods
+    
+    /// Signs up a new user
+    /// - Parameters:
+    ///   - name: User's name
+    ///   - email: User's email address
+    ///   - password: User's password
+    ///   - bloodType: User's blood type (optional)
+    ///   - country: User's country (optional)
+    /// - Returns: A publisher that emits a User on success or an Error on failure
+    func signUp(name: String, email: String, password: String, bloodType: String? = nil, country: String? = nil) -> AnyPublisher<User, Error> {
+        return authService.signUp(email: email, password: password, name: name, bloodType: bloodType, country: country)
+    }
+    
+    /// Signs in a user with Google
+    /// - Returns: A publisher that emits a User on success or an Error on failure
     func signInWithGoogle() -> AnyPublisher<User, Error> {
-        let user = User(
-            id: UUID().uuidString,
-            email: "google.user@example.com",
-            name: "Google User",
-            phoneNumber: nil,
-            bloodType: .oPositive,
-            lastDonationDate: nil,
-            donationCount: 1,
-            country: "Ireland"
-        )
-        
-        return Just(user)
-            .setFailureType(to: Error.self)
-            .delay(for: 1.0, scheduler: DispatchQueue.main)
-            .eraseToAnyPublisher()
+        return authService.signInWithGoogle()
     }
-
+    
+    /// Signs in a user with Apple
+    /// - Returns: A publisher that emits a User on success or an Error on failure
     func signInWithApple() -> AnyPublisher<User, Error> {
-        let user = User(
-            id: UUID().uuidString,
-            email: "apple.user@example.com",
-            name: "Apple User",
-            phoneNumber: nil,
-            bloodType: .abNegative,
-            lastDonationDate: nil,
-            donationCount: 2,
-            country: "UK"
-        )
-        
-        return Just(user)
-            .setFailureType(to: Error.self)
-            .delay(for: 1.0, scheduler: DispatchQueue.main)
-            .eraseToAnyPublisher()
+        return authService.signInWithApple()
+    }
+    
+    /// Check if the user is authenticated
+    /// - Returns: True if authenticated, false otherwise
+    func isAuthenticated() -> Bool {
+        return authService.isAuthenticated()
+    }
+    
+    /// Gets the currently authenticated user, if any
+    /// - Returns: A publisher that emits the current User or nil
+    func getCurrentUser() -> AnyPublisher<User?, Error> {
+        return authService.getCurrentUser()
     }
 }
 

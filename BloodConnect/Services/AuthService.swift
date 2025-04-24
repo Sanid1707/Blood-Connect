@@ -7,14 +7,38 @@
 
 import Foundation
 import Combine
+import SwiftData
 
+enum AuthError: Error {
+    case invalidCredentials
+    case invalidEmail
+    case networkError
+    case tokenStorageError
+    case userStorageError
+    case unauthorized
+}
+
+@MainActor
 class AuthService {
     // MARK: - Properties
     private let networkManager: NetworkManager
+    private let keychainService: KeychainService
+    private let dataService: DataServiceProtocol
     
     // MARK: - Initialization
-    init(networkManager: NetworkManager = NetworkManager()) {
+    init(networkManager: NetworkManager = NetworkManager(),
+         keychainService: KeychainService = KeychainService.shared,
+         dataService: DataServiceProtocol? = nil) {
         self.networkManager = networkManager
+        self.keychainService = keychainService
+        
+        if let dataService = dataService {
+            self.dataService = dataService
+        } else {
+            // Create default data service on the MainActor
+            let modelContext = DatabaseManager.shared.mainContext
+            self.dataService = SwiftDataService(modelContext: modelContext)
+        }
     }
     
     // MARK: - Authentication Methods
@@ -41,8 +65,31 @@ class AuthService {
                         phoneNumber: "+1234567890",
                         bloodType: .aPositive,
                         lastDonationDate: Date().addingTimeInterval(-60*60*24*30), // 30 days ago
-                        donationCount: 5
+                        donationCount: 5,
+                        country: "US"
                     )
+                    
+                    // Save mock token to keychain
+                    do {
+                        try self.keychainService.saveAuthToken("mock_token_\(user.id ?? "unknown")")
+                    } catch {
+                        promise(.failure(AuthError.tokenStorageError))
+                        return
+                    }
+                    
+                    // Save user to SwiftData
+                    self.dataService.createUser(user)
+                        .sink(
+                            receiveCompletion: { completion in
+                                if case .failure = completion {
+                                    // If we can't save the user, continue anyway since we have the token
+                                    print("Warning: Failed to save user to database")
+                                }
+                            },
+                            receiveValue: { _ in }
+                        )
+                        .cancel()
+                    
                     promise(.success(user))
                 } else {
                     promise(.failure(AuthError.invalidCredentials))
@@ -71,6 +118,28 @@ class AuthService {
                     lastDonationDate: nil,
                     donationCount: 0
                 )
+                
+                // Save mock token to keychain
+                do {
+                    try self.keychainService.saveAuthToken("mock_google_token_\(user.id ?? "unknown")")
+                } catch {
+                    promise(.failure(AuthError.tokenStorageError))
+                    return
+                }
+                
+                // Save user to SwiftData
+                self.dataService.createUser(user)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure = completion {
+                                // If we can't save the user, continue anyway since we have the token
+                                print("Warning: Failed to save user to database")
+                            }
+                        },
+                        receiveValue: { _ in }
+                    )
+                    .cancel()
+                
                 promise(.success(user))
             }
         }
@@ -96,6 +165,28 @@ class AuthService {
                     lastDonationDate: nil,
                     donationCount: 0
                 )
+                
+                // Save mock token to keychain
+                do {
+                    try self.keychainService.saveAuthToken("mock_apple_token_\(user.id ?? "unknown")")
+                } catch {
+                    promise(.failure(AuthError.tokenStorageError))
+                    return
+                }
+                
+                // Save user to SwiftData
+                self.dataService.createUser(user)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure = completion {
+                                // If we can't save the user, continue anyway since we have the token
+                                print("Warning: Failed to save user to database")
+                            }
+                        },
+                        receiveValue: { _ in }
+                    )
+                    .cancel()
+                
                 promise(.success(user))
             }
         }
@@ -129,7 +220,7 @@ class AuthService {
     ///   - password: User's password
     ///   - name: User's full name
     /// - Returns: A publisher that emits a User on success or an Error on failure
-    func signUp(email: String, password: String, name: String) -> AnyPublisher<User, Error> {
+    func signUp(email: String, password: String, name: String, bloodType: String? = nil, country: String? = nil) -> AnyPublisher<User, Error> {
         // In a real app, this would make a network request to your authentication API
         // For now, we'll simulate a successful signup with a delay
         
@@ -137,16 +228,39 @@ class AuthService {
             // Simulate network delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 // Create a mock user
+                let bloodTypeEnum = bloodType != nil ? BloodType(rawValue: bloodType!) : nil
                 let user = User(
-                    id: "new789",
+                    id: "new_\(UUID().uuidString)",
                     email: email,
                     name: name,
                     phoneNumber: nil,
-                    bloodType: nil,
+                    bloodType: bloodTypeEnum,
                     lastDonationDate: nil,
-                    donationCount: 0
+                    donationCount: 0,
+                    country: country
                 )
-                promise(.success(user))
+                
+                // Save mock token to keychain
+                do {
+                    try self.keychainService.saveAuthToken("new_user_token_\(user.id ?? "unknown")")
+                } catch {
+                    promise(.failure(AuthError.tokenStorageError))
+                    return
+                }
+                
+                // Save user to SwiftData
+                self.dataService.createUser(user)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                promise(.failure(error))
+                            }
+                        },
+                        receiveValue: { savedUser in
+                            promise(.success(savedUser))
+                        }
+                    )
+                    .cancel()
             }
         }
         .eraseToAnyPublisher()
@@ -154,12 +268,40 @@ class AuthService {
     
     /// Signs out the current user
     func signOut() {
-        // In a real app, this would clear tokens and session data
-        print("User signed out")
+        // Delete token from keychain
+        try? keychainService.deleteAuthToken()
+        
+        // Clear any user preferences if needed
+        UserDefaultsService.shared.clearLoginCredentials()
     }
-}
-
-// Additional auth-related error types
-extension AuthError {
-    static let invalidEmail = NSError(domain: "AuthError", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid email format"])
+    
+    /// Checks if the user is authenticated
+    /// - Returns: True if authenticated, false otherwise
+    func isAuthenticated() -> Bool {
+        return keychainService.authTokenExists()
+    }
+    
+    /// Gets the currently authenticated user
+    /// - Returns: A publisher that emits the current User or nil if not authenticated
+    func getCurrentUser() -> AnyPublisher<User?, Error> {
+        guard isAuthenticated() else {
+            return Just(nil)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        }
+        
+        // In a real app, you would get the user ID from the token or make an API call
+        // For this example, we'll return a mock user
+        return Just(User(
+            id: "current_user",
+            email: "current@example.com",
+            name: "Current User",
+            phoneNumber: "+1234567890",
+            bloodType: .aPositive,
+            lastDonationDate: Date().addingTimeInterval(-60*60*24*30),
+            donationCount: 3
+        ))
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
+    }
 }
