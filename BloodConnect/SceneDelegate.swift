@@ -8,41 +8,26 @@
 import UIKit
 import SwiftUI
 import SwiftData
+import FirebaseFirestore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    private var syncService: FirebaseDataService?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        // Create the SwiftData ModelContainer
-        let schema = Schema([
-            UserModel.self,
-            BloodSeekerModel.self,
-            DonationCenterModel.self,
-            OperatingHoursModel.self
-        ])
-        
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            allowsSave: true
-        )
-        
         do {
-            // Create the SwiftData container
-            let container = try ModelContainer(
-                for: schema,
-                configurations: [modelConfiguration]
-            )
+            // Initialize DatabaseManager to ensure schema and migrations are set up
+            let container = DatabaseManager.shared.modelContainer
             
             // Create the SwiftUI view that provides the window contents - Now using SplashView
             let contentView = SplashView()
                 .modelContainer(container)
+                .environmentObject(createAuthViewModel())
 
             // Use a UIHostingController as window root view controller
             if let windowScene = scene as? UIWindowScene {
@@ -51,8 +36,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 self.window = window
                 window.makeKeyAndVisible()
             }
+            
+            // Initialize the sync service
+            self.syncService = FirebaseDataService(modelContext: container.mainContext)
+            
+            // Sync data with Firebase
+            syncDataWithFirebase()
+            
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            fatalError("Failed to create model container: \(error)")
         }
     }
 
@@ -66,6 +58,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        
+        // Sync data when the app becomes active
+        syncDataWithFirebase()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -82,8 +77,36 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        
+        // Push any pending changes to Firebase before entering background
+        syncDataWithFirebase()
     }
-
-
+    
+    // MARK: - Private Methods
+    
+    private func createAuthViewModel() -> AuthViewModel {
+        // Create an instance of your custom auth view model
+        // Use FirebaseAuthService instead of regular AuthService
+        let authViewModel = AuthViewModel()
+        
+        // Check if currently authenticated
+        if FirebaseAuthService().isAuthenticated() {
+            authViewModel.authenticate()
+        }
+        
+        return authViewModel
+    }
+    
+    private func syncDataWithFirebase() {
+        // Check network connectivity first
+        // For now, just attempt sync
+        Task {
+            do {
+                try await syncService?.syncAll()
+            } catch {
+                print("Error syncing data with Firebase: \(error.localizedDescription)")
+            }
+        }
+    }
 }
 

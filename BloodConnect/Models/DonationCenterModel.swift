@@ -24,6 +24,10 @@ final class DonationCenterModel {
     var currentNeedLevels: [String] = []
     var createdAt: Date
     
+    // Cloud sync properties
+    var cloudId: String?
+    var lastSyncedAt: Date?
+    
     init(id: String = UUID().uuidString,
          name: String,
          address: String,
@@ -47,6 +51,8 @@ final class DonationCenterModel {
         self.latitude = latitude
         self.longitude = longitude
         self.createdAt = Date()
+        self.cloudId = nil
+        self.lastSyncedAt = nil
     }
     
     // Convert from regular DonationCenter struct

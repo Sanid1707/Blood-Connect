@@ -12,6 +12,10 @@ final class BloodSeekerModel {
     var createdAt: Date
     var userId: String?
     
+    // Cloud sync properties
+    var cloudId: String?
+    var lastSyncedAt: Date?
+    
     init(id: String = UUID().uuidString,
          name: String,
          requestDescription: String,
@@ -27,6 +31,8 @@ final class BloodSeekerModel {
         self.imageURL = imageURL
         self.createdAt = Date()
         self.userId = userId
+        self.cloudId = nil
+        self.lastSyncedAt = nil
     }
     
     // Convert from regular BloodSeeker struct

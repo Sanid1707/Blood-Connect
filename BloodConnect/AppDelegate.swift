@@ -7,14 +7,24 @@
 
 import UIKit
 import SwiftData
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Configure Firebase
+        FirebaseApp.configure()
+        
         // Initialize services on the main thread since we're accessing @MainActor-isolated types
         Task { @MainActor in
             setupServices()
+            
+            // Create sample data
+            if UserDefaultsService.shared.isFirstLaunch {
+                try? await createSampleData()
+                UserDefaultsService.shared.isFirstLaunch = false
+            }
         }
         
         // Update last open date in UserDefaults
@@ -52,24 +62,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("BloodConnect services initialized successfully")
     }
     
+    @MainActor
+    private func createSampleData() async throws {
+        let sampleDataService = SampleDataService()
+        try await sampleDataService.createSampleData()
+    }
+    
     private func printDatabaseLocation() {
-        // Print the application support directory path where SwiftData stores databases
-        let appSupportPath = URL.applicationSupportDirectory.path(percentEncoded: false)
-        let dbPath = "\(appSupportPath)/default.store"
-        print("--------------------------------")
-        print("📊 DATABASE LOCATION:")
-        print("📂 \(dbPath)")
-        print("--------------------------------")
-        
-        // Also print the documents directory for convenience
-        if let docsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.path {
-            print("📁 Documents directory: \(docsPath)")
+        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        if let appSupportURL = urls.first {
+            let dbFolderURL = appSupportURL.appendingPathComponent("default.store")
+            print("SwiftData database location: \(dbFolderURL.path)")
         }
-        
-        // Print command to open the folder
-        print("To open in Finder, run this in Terminal:")
-        print("open \"\(appSupportPath)\"")
-        print("--------------------------------")
     }
 }
 

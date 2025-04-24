@@ -18,7 +18,8 @@ class SignUpViewController {
         if let authService = authService {
             self.authService = authService
         } else {
-            self.authService = AuthService()
+            // Use Firebase Auth Service by default
+            self.authService = FirebaseAuthService()
         }
     }
     

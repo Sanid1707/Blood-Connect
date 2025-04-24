@@ -13,6 +13,10 @@ final class UserModel {
     var country: String?
     var createdAt: Date
     
+    // Cloud sync properties
+    var cloudId: String?
+    var lastSyncedAt: Date?
+    
     init(id: String = UUID().uuidString, 
          email: String,
          name: String,
@@ -30,6 +34,8 @@ final class UserModel {
         self.donationCount = donationCount
         self.country = country
         self.createdAt = Date()
+        self.cloudId = nil
+        self.lastSyncedAt = nil
     }
     
     // Convert from regular User struct

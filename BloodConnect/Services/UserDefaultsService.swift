@@ -17,10 +17,24 @@ class UserDefaultsService {
         static let lastOpenDate = "lastOpenDate"
         static let onboardingCompleted = "onboardingCompleted"
         static let languageCode = "languageCode"
+        static let isFirstLaunch = "isFirstLaunch"
     }
     
     // MARK: - UserDefaults instance
     private let defaults = UserDefaults.standard
+    
+    // MARK: - First Launch
+    
+    var isFirstLaunch: Bool {
+        get { 
+            // If the key doesn't exist yet, it's the first launch
+            if defaults.object(forKey: Keys.isFirstLaunch) == nil {
+                return true
+            }
+            return defaults.bool(forKey: Keys.isFirstLaunch)
+        }
+        set { defaults.set(newValue, forKey: Keys.isFirstLaunch) }
+    }
     
     // MARK: - Authentication Settings
     
