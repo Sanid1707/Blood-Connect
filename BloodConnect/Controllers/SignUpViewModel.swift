@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 class SignUpViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var name: String = ""
@@ -13,14 +14,30 @@ class SignUpViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = ""
+    @Published var isAuthenticated: Bool = false
 
     // MARK: - Private
     private let controller: SignUpViewController
+    private let userDefaultsService: UserDefaultsService
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
-    init(controller: SignUpViewController = SignUpViewController()) {
-        self.controller = controller
+    init(controller: SignUpViewController? = nil,
+         userDefaultsService: UserDefaultsService = UserDefaultsService.shared) {
+        self.userDefaultsService = userDefaultsService
+        
+        if let controller = controller {
+            self.controller = controller
+        } else {
+            self.controller = SignUpViewController()
+        }
+        
+        // Check if already authenticated
+        Task {
+            if self.controller.isAuthenticated() {
+                self.isAuthenticated = true
+            }
+        }
     }
 
     // MARK: - Actions
@@ -51,75 +68,132 @@ class SignUpViewModel: ObservableObject {
         }
 
         isLoading = true
-
-        controller.signUp(
-            name: name,
-            email: email,
-            password: password,
-            bloodType: bloodType.rawValue,
-            country: country
-        )
-        .receive(on: DispatchQueue.main)
-        .sink(
-            receiveCompletion: { [weak self] completion in
-                self?.isLoading = false
-                if case .failure(let error) = completion {
-                    self?.showAlertWith(error.localizedDescription)
-                }
-            },
-            receiveValue: { user in
-                print("User signed up: \(user.name)")
-                // Navigate to next screen or show success
-            }
-        )
-        .store(in: &cancellables)
+        
+        Task {
+            let publisher = controller.signUp(
+                name: name,
+                email: email,
+                password: password,
+                bloodType: bloodType.rawValue,
+                country: country
+            )
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        if case .failure(let error) = completion {
+                            self?.showAlertWith(error.localizedDescription)
+                        }
+                    },
+                    receiveValue: { [weak self] user in
+                        print("User signed up: \(user.name)")
+                        self?.isAuthenticated = true
+                        
+                        // Update last open date in UserDefaults
+                        self?.userDefaultsService.lastOpenDate = Date()
+                        
+                        // Set onboarding as incomplete for new user
+                        self?.userDefaultsService.onboardingCompleted = false
+                        
+                        // Notify the AuthViewModel that we're authenticated
+                        if let authViewModel = self?.getAuthViewModel() {
+                            authViewModel.authenticate()
+                        }
+                    }
+                )
+                .store(in: &cancellables)
+        }
     }
 
     func signInWithGoogle() {
         isLoading = true
 
-        controller.signInWithGoogle()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    if case .failure(let error) = completion {
-                        self?.showAlertWith(error.localizedDescription)
+        Task {
+            let publisher = controller.signInWithGoogle()
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        if case .failure(let error) = completion {
+                            self?.showAlertWith(error.localizedDescription)
+                        }
+                    },
+                    receiveValue: { [weak self] user in
+                        print("Signed up with Google: \(user.name)")
+                        self?.isAuthenticated = true
+                        
+                        // Update last open date in UserDefaults
+                        self?.userDefaultsService.lastOpenDate = Date()
+                        
+                        // Set onboarding as incomplete for new user
+                        self?.userDefaultsService.onboardingCompleted = false
                     }
-                },
-                receiveValue: { user in
-                    print("Signed up with Google: \(user.name)")
-                }
-            )
-            .store(in: &cancellables)
+                )
+                .store(in: &cancellables)
+        }
     }
 
     func signInWithApple() {
         isLoading = true
 
-        controller.signInWithApple()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    self?.isLoading = false
-                    if case .failure(let error) = completion {
-                        self?.showAlertWith(error.localizedDescription)
+        Task {
+            let publisher = controller.signInWithApple()
+            
+            publisher
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isLoading = false
+                        if case .failure(let error) = completion {
+                            self?.showAlertWith(error.localizedDescription)
+                        }
+                    },
+                    receiveValue: { [weak self] user in
+                        print("Signed up with Apple: \(user.name)")
+                        self?.isAuthenticated = true
+                        
+                        // Update last open date in UserDefaults
+                        self?.userDefaultsService.lastOpenDate = Date()
+                        
+                        // Set onboarding as incomplete for new user
+                        self?.userDefaultsService.onboardingCompleted = false
                     }
-                },
-                receiveValue: { user in
-                    print("Signed up with Apple: \(user.name)")
-                }
-            )
-            .store(in: &cancellables)
+                )
+                .store(in: &cancellables)
+        }
     }
 
     func goToSignIn() {
         print("Navigate to sign in")
+    }
+    
+    func signOut() {
+        Task {
+            controller.authService.signOut()
+            isAuthenticated = false
+        }
     }
 
     // MARK: - Helpers
     private func showAlertWith(_ message: String) {
         alertMessage = message
         showAlert = true
+    }
+
+    // MARK: - Helper methods
+    func setAuthViewModel(_ authViewModel: AuthViewModel) {
+        // This allows the view to pass its EnvironmentObject to the view model
+        _authViewModel = authViewModel
+    }
+    
+    // Reference to the parent AuthViewModel
+    private var _authViewModel: AuthViewModel?
+    
+    private func getAuthViewModel() -> AuthViewModel? {
+        return _authViewModel
     }
 }

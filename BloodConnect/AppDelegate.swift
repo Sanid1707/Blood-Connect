@@ -6,14 +6,33 @@
 //
 
 import UIKit
+import SwiftData
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Configure Firebase
+        FirebaseApp.configure()
+        
+        // Initialize services on the main thread since we're accessing @MainActor-isolated types
+        Task { @MainActor in
+            setupServices()
+            
+            // Create sample data
+            if UserDefaultsService.shared.isFirstLaunch {
+                try? await createSampleData()
+                UserDefaultsService.shared.isFirstLaunch = false
+            }
+        }
+        
+        // Update last open date in UserDefaults
+        UserDefaultsService.shared.lastOpenDate = Date()
+        
+        // Print database location for debugging
+        printDatabaseLocation()
+        
         return true
     }
 
@@ -31,6 +50,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-
+    // MARK: - Private Methods
+    
+    @MainActor
+    private func setupServices() {
+        // Initialize database
+        _ = DatabaseManager.shared
+        DatabaseManager.shared.prepareDatabase()
+        
+        // Log successful initialization
+        print("BloodConnect services initialized successfully")
+    }
+    
+    @MainActor
+    private func createSampleData() async throws {
+        let sampleDataService = SampleDataService()
+        try await sampleDataService.createSampleData()
+    }
+    
+    private func printDatabaseLocation() {
+        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        if let appSupportURL = urls.first {
+            let dbFolderURL = appSupportURL.appendingPathComponent("default.store")
+            print("SwiftData database location: \(dbFolderURL.path)")
+        }
+    }
 }
 

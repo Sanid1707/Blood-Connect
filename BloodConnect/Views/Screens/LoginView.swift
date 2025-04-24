@@ -2,8 +2,16 @@ import SwiftUI
 
 struct LoginView: View {
     // MARK: - State
-    @StateObject private var viewModel = LoginViewModel()
+    @StateObject private var viewModel: LoginViewModel
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
+    init() {
+        // Initialize the view model on the main actor
+        _viewModel = StateObject(wrappedValue: { @MainActor in 
+            return LoginViewModel()
+        }())
+    }
     
     var body: some View {
         ZStack {
@@ -186,7 +194,10 @@ struct LoginView: View {
                             .font(Typography.footnote)
                         
                         Button(action: {
-                            viewModel.goToSignUp()
+                            withAnimation {
+                                // Switch to sign up view in parent AuthView
+                                authViewModel.showSignUp(true)
+                            }
                         }) {
                             Text("Sign Up")
                                 .foregroundColor(AppColor.primaryRed)
@@ -217,6 +228,10 @@ struct LoginView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            // Pass the authViewModel to the LoginViewModel
+            viewModel.setAuthViewModel(authViewModel)
+        }
     }
 }
 

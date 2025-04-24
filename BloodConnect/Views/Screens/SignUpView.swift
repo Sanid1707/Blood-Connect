@@ -1,9 +1,17 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @StateObject private var viewModel = SignUpViewModel()
+    @StateObject private var viewModel: SignUpViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     let countries = ["Louth", "Dublin", "Meath", "Westmeath"]
+
+    init() {
+        // Initialize the view model on the main actor
+        _viewModel = StateObject(wrappedValue: { @MainActor in 
+            return SignUpViewModel()
+        }())
+    }
 
     var body: some View {
         ScrollView {
@@ -11,7 +19,9 @@ struct SignUpView: View {
 
                 // Back Button
                 Button(action: {
-                    viewModel.goToSignIn()
+                    withAnimation {
+                        authViewModel.showSignUp(false)
+                    }
                 }) {
                     Image(systemName: "arrow.left")
                         .font(.title3)
@@ -205,7 +215,9 @@ struct SignUpView: View {
                         .font(.system(size: 14))
 
                     Button(action: {
-                        viewModel.goToSignIn()
+                        withAnimation {
+                            authViewModel.showSignUp(false)
+                        }
                     }) {
                         Text("Sign In")
                             .foregroundColor(AppColor.primaryRed)
@@ -221,6 +233,10 @@ struct SignUpView: View {
         .edgesIgnoringSafeArea(.bottom)
         .alert(isPresented: $viewModel.showAlert) {
             Alert(title: Text("Oops!"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
+        }
+        .onAppear {
+            // Pass the authViewModel to the SignUpViewModel
+            viewModel.setAuthViewModel(authViewModel)
         }
     }
 }
