@@ -4,11 +4,10 @@ struct SignUpView: View {
     @StateObject private var viewModel: SignUpViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
 
-    let countries = ["Louth", "Dublin", "Meath", "Westmeath"]
+    let counties = ["Louth", "Dublin", "Meath", "Westmeath"]
 
     init() {
-        // Initialize the view model on the main actor
-        _viewModel = StateObject(wrappedValue: { @MainActor in 
+        _viewModel = StateObject(wrappedValue: { @MainActor in
             return SignUpViewModel()
         }())
     }
@@ -17,7 +16,6 @@ struct SignUpView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                // Back Button
                 Button(action: {
                     withAnimation {
                         authViewModel.showSignUp(false)
@@ -31,21 +29,19 @@ struct SignUpView: View {
                         .clipShape(Circle())
                         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
-              
-                    HStack {
-                        Image(systemName: "drop.fill")
-                            .font(.title)
-                            .foregroundColor(AppColor.primaryRed)
-                        
-                        Text("BloodConnect")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(AppColor.primaryRed)
-                    }
-                    .padding(.bottom, 8)
-                    
 
-                // Title & Subtitle
+                HStack {
+                    Image(systemName: "drop.fill")
+                        .font(.title)
+                        .foregroundColor(AppColor.primaryRed)
+
+                    Text("BloodConnect")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(AppColor.primaryRed)
+                }
+                .padding(.bottom, 8)
+
                 Text("Sign Up Your Account")
                     .font(.system(size: 22, weight: .bold))
 
@@ -54,13 +50,11 @@ struct SignUpView: View {
                     .foregroundColor(.gray)
                     .padding(.bottom, 10)
 
-                // Full Name
                 TextField("David John", text: $viewModel.name)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
 
-                // Email
                 TextField("davidjohn172@gmail.com", text: $viewModel.email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
@@ -68,7 +62,6 @@ struct SignUpView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
 
-                // Password
                 HStack {
                     if viewModel.showPassword {
                         TextField("15#@aa09", text: $viewModel.password)
@@ -87,17 +80,63 @@ struct SignUpView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
 
-                // Blood Type Picker
+                Text("I am registering as:")
+                    .font(.system(size: 16, weight: .semibold))
+
+                Picker("User Type", selection: $viewModel.userType) {
+                    ForEach(UserType.allCases) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.bottom, 10)
+
+                if viewModel.userType == .donor {
+                    Menu {
+                        ForEach(BloodType.allCases, id: \.self) { type in
+                            Button(type.displayName) {
+                                viewModel.bloodType = type
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text(viewModel.bloodType.displayName)
+                                .foregroundColor(.black)
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
+
+                    TextField("Available (e.g. Weekends)", text: $viewModel.availability)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                } else {
+                    TextField("Working Hours (e.g. 9 AM - 5 PM)", text: $viewModel.workingHours)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+
+                    TextField("Address (optional)", text: $viewModel.address)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                }
+
                 Menu {
-                    ForEach(BloodType.allCases, id: \.self) { type in
-                        Button(type.displayName) {
-                            viewModel.bloodType = type
+                    ForEach(counties, id: \.self) { county in
+                        Button(county) {
+                            viewModel.county = county
                         }
                     }
                 } label: {
                     HStack {
-                        Text(viewModel.bloodType.displayName)
-                            .foregroundColor(.black)
+                        Text(viewModel.county.isEmpty ? "Select County" : viewModel.county)
+                            .foregroundColor(viewModel.county.isEmpty ? .gray : .black)
                         Spacer()
                         Image(systemName: "chevron.down")
                             .foregroundColor(.gray)
@@ -107,27 +146,6 @@ struct SignUpView: View {
                     .cornerRadius(10)
                 }
 
-                // Country Picker
-                Menu {
-                    ForEach(countries, id: \.self) { country in
-                        Button(country) {
-                            viewModel.country = country
-                        }
-                    }
-                } label: {
-                    HStack {
-                        Text(viewModel.country.isEmpty ? "Select County" : viewModel.country)
-                            .foregroundColor(viewModel.country.isEmpty ? .gray : .black)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                }
-
-                // Terms Agreement
                 HStack(spacing: 8) {
                     Button(action: {
                         viewModel.agreedToTerms.toggle()
@@ -141,7 +159,6 @@ struct SignUpView: View {
                 }
                 .padding(.top, 10)
 
-                // Sign Up Button
                 Button(action: {
                     viewModel.signUp()
                 }) {
@@ -164,7 +181,6 @@ struct SignUpView: View {
                 }
                 .padding(.top)
 
-                // OR Divider
                 HStack {
                     Rectangle()
                         .frame(height: 1)
@@ -176,7 +192,6 @@ struct SignUpView: View {
                         .foregroundColor(.gray.opacity(0.3))
                 }
 
-                // Social Buttons
                 VStack {
                     HStack(spacing: 10) {
                         Button(action: {
@@ -201,14 +216,12 @@ struct SignUpView: View {
                                 .cornerRadius(10)
                         }
                     }
-                    .frame(maxWidth: .infinity) // Stretch to fill available width
-                    .multilineTextAlignment(.center) // Optional if you're using text
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
                     .padding()
-                    .background(Color.clear) // Optional
+                    .background(Color.clear)
                 }
 
-
-                // Sign In Footer
                 HStack(spacing: 4) {
                     Text("Already Have An Account?")
                         .foregroundColor(.gray)
@@ -235,7 +248,6 @@ struct SignUpView: View {
             Alert(title: Text("Oops!"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
         }
         .onAppear {
-            // Pass the authViewModel to the SignUpViewModel
             viewModel.setAuthViewModel(authViewModel)
         }
     }

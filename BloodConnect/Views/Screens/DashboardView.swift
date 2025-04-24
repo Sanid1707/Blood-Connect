@@ -5,6 +5,7 @@ struct DashboardView: View {
     @State private var isLoaded = false
     @State private var showFindDonorsView = false
     @State private var showDonateView = false
+    @State private var showMapScreen = false
     
     // Ensure we have simple data that doesn't rely on external models
     let actions = [
@@ -109,7 +110,7 @@ struct DashboardView: View {
                                 Spacer()
                                 HStack {
                                     Spacer()
-                                    Button(action: {}) {
+                                    Button(action: {showMapScreen = true}) {
                                         Image(systemName: "paperplane.fill")
                                             .font(.system(size: 16))
                                             .foregroundColor(.white)
@@ -119,8 +120,12 @@ struct DashboardView: View {
                                     }
                                     .padding(.trailing, 25)
                                     .padding(.bottom, 10)
+                                    
                                 }
                             }
+                        }
+                        .fullScreenCover(isPresented:$showMapScreen) {
+                            NearbyMapView()
                         }
                         
                         // Action Buttons Grid
