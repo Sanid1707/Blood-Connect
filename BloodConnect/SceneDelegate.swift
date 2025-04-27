@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import SwiftData
 import FirebaseFirestore
+import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -91,10 +92,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Create an instance of your custom auth view model
         // Use FirebaseAuthService instead of regular AuthService
         let authViewModel = AuthViewModel()
+        let authService = FirebaseAuthService()
         
-        // Check if currently authenticated
-        if FirebaseAuthService().isAuthenticated() {
+        // Check if currently authenticated with detailed debugging
+        let isAuth = authService.isAuthenticated()
+        print("DEBUG - Authentication Check in SceneDelegate")
+        print("DEBUG - FirebaseAuth.currentUser exists: \(Auth.auth().currentUser != nil)")
+        
+        if let token = try? authService.keychainService.getAuthToken() {
+            print("DEBUG - Auth token exists in keychain: \(token.prefix(10))...")
+        } else {
+            print("DEBUG - No auth token found in keychain")
+        }
+        
+        if isAuth {
+            print("DEBUG - User is authenticated, setting authViewModel.isAuthenticated = true")
             authViewModel.authenticate()
+        } else {
+            print("DEBUG - User is NOT authenticated")
         }
         
         return authViewModel

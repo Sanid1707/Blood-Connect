@@ -54,7 +54,7 @@ class SwiftDataService: DataServiceProtocol {
                 return
             }
             do {
-                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate { $0.id == id })
+                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate<UserModel> { user in user.id == id })
                 let users = try self.modelContext.fetch(descriptor)
                 promise(.success(users.first?.toUser()))
             } catch {
@@ -75,7 +75,7 @@ class SwiftDataService: DataServiceProtocol {
                 return
             }
             do {
-                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate { $0.id == userId })
+                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate<UserModel> { user in user.id == userId })
                 let users = try self.modelContext.fetch(descriptor)
                 if let userModel = users.first {
                     userModel.name = user.name
@@ -109,7 +109,7 @@ class SwiftDataService: DataServiceProtocol {
                 return
             }
             do {
-                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate { $0.id == id })
+                let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate<UserModel> { user in user.id == id })
                 let users = try self.modelContext.fetch(descriptor)
                 if let user = users.first {
                     self.modelContext.delete(user)
@@ -224,7 +224,7 @@ class SwiftDataService: DataServiceProtocol {
             }
             
             do {
-                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate { $0.id == id })
+                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate<DonationCenterModel> { center in center.id == id })
                 let centers = try self.modelContext.fetch(descriptor)
                 if let center = centers.first {
                     promise(.success(center.toDonationCenter()))
@@ -246,7 +246,7 @@ class SwiftDataService: DataServiceProtocol {
             }
             
             do {
-                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate { $0.id == center.id })
+                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate<DonationCenterModel> { model in model.id == center.id })
                 let centers = try self.modelContext.fetch(descriptor)
                 if let centerModel = centers.first {
                     // Update properties
@@ -302,7 +302,7 @@ class SwiftDataService: DataServiceProtocol {
             }
             
             do {
-                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate { $0.id == id })
+                let descriptor = FetchDescriptor<DonationCenterModel>(predicate: #Predicate<DonationCenterModel> { center in center.id == id })
                 let centers = try self.modelContext.fetch(descriptor)
                 if let center = centers.first {
                     self.modelContext.delete(center)

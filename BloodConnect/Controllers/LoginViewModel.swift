@@ -39,12 +39,20 @@ class LoginViewModel: ObservableObject {
         self.rememberMe = userDefaultsService.rememberMe
         if rememberMe, let savedEmail = userDefaultsService.savedEmail {
             self.email = savedEmail
+            print("DEBUG - LoginViewModel: Loaded saved email: \(savedEmail)")
         }
         
         // Check if already authenticated
         Task {
-            if self.controller.isAuthenticated() {
+            print("DEBUG - LoginViewModel: Checking authentication status")
+            let isAuth = self.controller.isAuthenticated()
+            print("DEBUG - LoginViewModel: isAuthenticated = \(isAuth)")
+            
+            if isAuth {
+                print("DEBUG - LoginViewModel: User is authenticated, updating UI")
                 self.isAuthenticated = true
+            } else {
+                print("DEBUG - LoginViewModel: User is NOT authenticated")
             }
         }
     }

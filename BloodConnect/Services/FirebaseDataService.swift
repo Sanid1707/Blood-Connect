@@ -56,8 +56,8 @@ class FirebaseDataService {
     
     private func uploadUsers() async throws {
         // Get all users that haven't been synced or have changed since last sync
-        let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate { 
-            $0.cloudId == nil || ($0.lastSyncedAt == nil)
+        let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate<UserModel> { user in
+            user.cloudId == nil || (user.lastSyncedAt == nil)
         })
         
         let usersToSync = try modelContext.fetch(descriptor)
@@ -147,8 +147,8 @@ class FirebaseDataService {
             let documentId = document.documentID
             
             // Check if user already exists in local database
-            let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate { 
-                $0.id == documentId || $0.cloudId == documentId 
+            let descriptor = FetchDescriptor<UserModel>(predicate: #Predicate<UserModel> { user in 
+                user.id == documentId || user.cloudId == documentId 
             })
             let matchingUsers = try modelContext.fetch(descriptor)
             
@@ -306,8 +306,8 @@ class FirebaseDataService {
     
     private func uploadBloodRequests() async throws {
         // Get all blood requests that haven't been synced or have changed since last sync
-        let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate { 
-            $0.cloudId == nil || ($0.lastSyncedAt == nil)
+        let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in
+            request.cloudId == nil || (request.lastSyncedAt == nil)
         })
         
         let requestsToSync = try modelContext.fetch(descriptor)
@@ -369,8 +369,8 @@ class FirebaseDataService {
             let documentId = document.documentID
             
             // Check if request already exists in local database by cloud ID
-            let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate { 
-                $0.cloudId == documentId 
+            let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in 
+                request.cloudId == documentId 
             })
             let matchingRequests = try modelContext.fetch(descriptor)
             
@@ -381,8 +381,8 @@ class FirebaseDataService {
             } else {
                 // Check if it exists by ID (in case it was created locally but not yet synced)
                 if let id = data["id"] as? String {
-                    let idDescriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate { 
-                        $0.id == id 
+                    let idDescriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in 
+                        request.id == id 
                     })
                     let matchesByID = try modelContext.fetch(idDescriptor)
                     

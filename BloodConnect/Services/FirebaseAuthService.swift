@@ -424,7 +424,17 @@ class FirebaseAuthService: AuthService {
     }
 
     override func isAuthenticated() -> Bool {
-        return Auth.auth().currentUser != nil
+        // Check both Firebase Auth and keychain token
+        let firebaseUserExists = Auth.auth().currentUser != nil
+        let keychainTokenExists = keychainService.authTokenExists()
+        
+        print("DEBUG - FirebaseAuthService.isAuthenticated() check:")
+        print("DEBUG - Firebase currentUser exists: \(firebaseUserExists)")
+        print("DEBUG - Keychain token exists: \(keychainTokenExists)")
+        
+        // Consider authenticated if either Firebase user exists or keychain token exists
+        // In a real app, you would also validate the token
+        return firebaseUserExists || keychainTokenExists
     }
 
     override func getCurrentUser() -> AnyPublisher<User?, Error> {

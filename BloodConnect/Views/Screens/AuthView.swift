@@ -33,9 +33,18 @@ struct AuthView: View {
                     }
                 }
                 .animation(.easeInOut(duration: 0.3), value: authViewModel.showingSignUp)
-                                        }
-                                    }
+            }
+        }
         .animation(.easeInOut(duration: 0.5), value: authViewModel.isAuthenticated)
+        .onAppear {
+            // Double-check authentication status when this view appears
+            print("DEBUG - AuthView appeared, checking authentication")
+            let authService = FirebaseAuthService()
+            if authService.isAuthenticated() && !authViewModel.isAuthenticated {
+                print("DEBUG - AuthView found user is authenticated, updating UI")
+                authViewModel.authenticate()
+            }
+        }
     }
 }
 
