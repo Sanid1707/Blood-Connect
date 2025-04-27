@@ -37,6 +37,7 @@ class DatabaseManager {
         let schema = Schema([
             UserModel.self,
             BloodSeekerModel.self,
+            BloodRequestModel.self,
             DonationCenterModel.self,
             OperatingHoursModel.self
         ])
@@ -96,6 +97,7 @@ class DatabaseManager {
         // Delete each model type
         try deleteAllEntities(ofType: UserModel.self)
         try deleteAllEntities(ofType: BloodSeekerModel.self)
+        try deleteAllEntities(ofType: BloodRequestModel.self)
         try deleteAllEntities(ofType: DonationCenterModel.self)
         try deleteAllEntities(ofType: OperatingHoursModel.self)
         

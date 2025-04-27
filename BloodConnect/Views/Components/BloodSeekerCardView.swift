@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BloodSeekerCardView: View {
     let name: String
-    let description: String
+    let seekerDescription: String
     let timeAgo: String
     let location: String
     let bloodType: String
@@ -29,7 +29,7 @@ struct BloodSeekerCardView: View {
                 BloodDropComponent(bloodType: bloodType)
             }
             
-            Text(description)
+            Text(seekerDescription)
                 .font(.system(size: 14))
                 .foregroundColor(AppColor.secondaryText)
                 .lineLimit(2)
@@ -99,7 +99,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                 VStack(spacing: 16) {
                     BloodSeekerCardView(
                         name: "James Peterson",
-                        description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
+                        seekerDescription: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
                         timeAgo: "5 Min Ago",
                         location: "London, England",
                         bloodType: "B+",
@@ -110,7 +110,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                     
                     BloodSeekerCardView(
                         name: "Sarah Johnson",
-                        description: "Urgently need blood donation for surgery scheduled tomorrow morning.",
+                        seekerDescription: "Urgently need blood donation for surgery scheduled tomorrow morning.",
                         timeAgo: "30 Min Ago",
                         location: "Manchester, UK",
                         bloodType: "O-",

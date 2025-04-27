@@ -27,23 +27,29 @@ class SignUpViewController {
         county: String,
         userType: String,
         availability: String? = nil,
-        workingHours: String? = nil,
         address: String? = nil,
         latitude: Double? = nil,
-        longitude: Double? = nil
+        longitude: Double? = nil,
+        phoneNumber: String? = nil,
+        organizationDescription: String? = nil,
+        workingHours: String? = nil,
+        eircode: String? = nil
     ) -> AnyPublisher<User, Error> {
         return authService.signUp(
+            name: name,
             email: email,
             password: password,
-            name: name,
             bloodType: bloodType,
             county: county,
             userType: userType,
-            workingHours: workingHours,
             availability: availability,
             address: address,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            phoneNumber: phoneNumber,
+            organizationDescription: organizationDescription,
+            workingHours: workingHours,
+            eircode: eircode
         )
     }
 

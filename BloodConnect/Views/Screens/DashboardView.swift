@@ -168,7 +168,7 @@
 //                            ForEach(bloodSeekers, id: \.name) { seeker in
 //                                BloodSeekerCardView(
 //                                    name: seeker.name,
-//                                    description: seeker.desc,
+//                                    seeker_description: seeker.desc,
 //                                    timeAgo: seeker.time,
 //                                    location: seeker.location,
 //                                    bloodType: seeker.bloodType,
@@ -343,7 +343,7 @@ struct DashboardView: View {
                             ForEach(bloodSeekers, id: \ .name) { seeker in
                                 BloodSeekerCardView(
                                     name: seeker.name,
-                                    description: seeker.desc,
+                                    seekerDescription: seeker.desc,
                                     timeAgo: seeker.time,
                                     location: seeker.location,
                                     bloodType: seeker.bloodType,

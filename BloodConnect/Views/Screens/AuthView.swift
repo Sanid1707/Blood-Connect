@@ -5,47 +5,37 @@ struct AuthView: View {
     
     var body: some View {
         ZStack {
+            // Background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [Color.white, Color(hex: "FFEEF1")]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
             if authViewModel.isAuthenticated {
                 MainView()
                     .transition(.opacity)
             } else {
-                if authViewModel.showingSignUp {
-                    SignUpView()
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-                        .environmentObject(authViewModel)
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    if value.translation.width > 100 {
-                                        withAnimation {
-                                            authViewModel.showSignUp(false)
-                                        }
-                                    }
-                                }
-                        )
-                } else {
+                ZStack {
+                    // Login view is always present but may be hidden
                     LoginView()
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .leading),
-                            removal: .move(edge: .trailing)
-                        ))
                         .environmentObject(authViewModel)
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    if value.translation.width < -100 {
-                                        withAnimation {
-                                            authViewModel.showSignUp(true)
+                        .opacity(authViewModel.showingSignUp ? 0 : 1)
+                        .zIndex(0)
+                    
+                    // Sign up view slides in when needed
+                    if authViewModel.showingSignUp {
+                        NewSignUpView()
+                            .environmentObject(authViewModel)
+                            .transition(.move(edge: .trailing))
+                            .zIndex(1)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3), value: authViewModel.showingSignUp)
                                         }
                                     }
-                                }
-                        )
-                }
-            }
-        }
+        .animation(.easeInOut(duration: 0.5), value: authViewModel.isAuthenticated)
     }
 }
 
@@ -55,18 +45,24 @@ class AuthViewModel: ObservableObject {
     @Published var showingSignUp = false
     
     func showSignUp(_ show: Bool) {
-        withAnimation {
+        print("AuthViewModel - showSignUp called with show=\(show)")
+        // Don't re-animate if already in the desired state
+        if showingSignUp != show {
+            withAnimation(.easeInOut(duration: 0.3)) {
             showingSignUp = show
+            }
         }
     }
     
     func authenticate() {
+        print("AuthViewModel - authenticate called")
         withAnimation {
             isAuthenticated = true
         }
     }
     
     func logout() {
+        print("AuthViewModel - logout called")
         withAnimation {
             isAuthenticated = false
         }

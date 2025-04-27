@@ -214,6 +214,7 @@ class LoginViewModel: ObservableObject {
     
     func setAuthViewModel(_ authViewModel: AuthViewModel) {
         // This allows the view to pass its EnvironmentObject to the view model
+        print("LoginViewModel - setAuthViewModel called")
         _authViewModel = authViewModel
     }
     

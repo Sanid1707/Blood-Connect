@@ -24,10 +24,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // Initialize DatabaseManager to ensure schema and migrations are set up
             let container = DatabaseManager.shared.modelContainer
             
+            // Create shared auth view model that will be passed to all views
+            let sharedAuthViewModel = createAuthViewModel()
+            
             // Create the SwiftUI view that provides the window contents - Now using SplashView
             let contentView = SplashView()
                 .modelContainer(container)
-                .environmentObject(createAuthViewModel())
+                .environmentObject(sharedAuthViewModel)
 
             // Use a UIHostingController as window root view controller
             if let windowScene = scene as? UIWindowScene {

@@ -98,7 +98,8 @@ class FirebaseDataService {
             "email": user.email,
             "name": user.name,
             "donationCount": user.donationCount,
-            "createdAt": user.createdAt
+            "createdAt": user.createdAt,
+            "userType": user.userType
         ]
         
         // Add optional fields
@@ -116,6 +117,22 @@ class FirebaseDataService {
         
         if let county = user.county {
             userData["county"] = county
+        }
+        
+        if let availability = user.availability {
+            userData["availability"] = availability
+        }
+        
+        if let address = user.address {
+            userData["address"] = address
+        }
+        
+        if let latitude = user.latitude {
+            userData["latitude"] = latitude
+        }
+        
+        if let longitude = user.longitude {
+            userData["longitude"] = longitude
         }
         
         return userData
@@ -155,11 +172,14 @@ class FirebaseDataService {
             let id = doc.documentID
             let email = data["email"] as? String ?? ""
             let name = data["name"] as? String ?? ""
-            let userType = data["userType"] as? String ?? "Donor"
+            let userType = data["userType"] as? String ?? "donor"
             let lat = data["latitude"] as? Double
             let lon = data["longitude"] as? Double
-
-            guard let latitude = lat, let longitude = lon else { return nil }
+            
+            // Only require coordinates for organizations
+            if userType == "organization" && (lat == nil || lon == nil) {
+                return nil
+            }
 
             return User(
                 id: id,
@@ -171,11 +191,10 @@ class FirebaseDataService {
                 donationCount: data["donationCount"] as? Int ?? 0,
                 county: data["county"] as? String,
                 userType: userType,
-                workingHours: data["workingHours"] as? String,
                 availability: data["availability"] as? String,
                 address: data["address"] as? String,
-                latitude: latitude,
-                longitude: longitude
+                latitude: lat,
+                longitude: lon
             )
         }
     }
@@ -211,6 +230,25 @@ class FirebaseDataService {
             user.county = county
         }
         
+        if let userType = data["userType"] as? String {
+            user.userType = userType
+        }
+        
+        if let availability = data["availability"] as? String {
+            user.availability = availability
+        }
+        
+        if let address = data["address"] as? String {
+            user.address = address
+        }
+        
+        if let latitude = data["latitude"] as? Double {
+            user.latitude = latitude
+        }
+        
+        if let longitude = data["longitude"] as? Double {
+            user.longitude = longitude
+        }
     }
     
     private func createUserModelFromFirestore(documentId: String, data: [String: Any]) {
@@ -220,8 +258,7 @@ class FirebaseDataService {
         let bloodType = data["bloodType"] as? String
         let donationCount = data["donationCount"] as? Int ?? 0
         let county = data["county"] as? String
-        let userType = data["userType"] as? String ?? "Donor"
-        let workingHours = data["workingHours"] as? String
+        let userType = data["userType"] as? String ?? "donor"
         let availability = data["availability"] as? String
         let address = data["address"] as? String
         let latitude = data["latitude"] as? Double
@@ -248,10 +285,9 @@ class FirebaseDataService {
             lastDonationDate: lastDonationDate,
             donationCount: donationCount,
             county: county,
-            userType : userType,
-            workingHours : workingHours,
-            availability : availability,
-            address :  address,
+            userType: userType,
+            availability: availability,
+            address: address,
             latitude: latitude,
             longitude: longitude
         )
@@ -310,7 +346,7 @@ class FirebaseDataService {
         var requestData: [String: Any] = [
             "id": request.id,
             "name": request.name,
-            "requestDescription": request.requestDescription,
+            "requestDescription": request.seekerDescription,
             "location": request.location,
             "bloodType": request.bloodType,
             "imageURL": request.imageURL,
@@ -372,8 +408,8 @@ class FirebaseDataService {
             request.name = name
         }
         
-        if let description = data["requestDescription"] as? String {
-            request.requestDescription = description
+        if let requestDesc = data["requestDescription"] as? String {
+            request.seekerDescription = requestDesc
         }
         
         if let location = data["location"] as? String {
@@ -401,7 +437,7 @@ class FirebaseDataService {
         // Extract data fields
         let id = data["id"] as? String ?? UUID().uuidString
         let name = data["name"] as? String ?? ""
-        let description = data["requestDescription"] as? String ?? ""
+        let requestDesc = data["requestDescription"] as? String ?? ""
         let location = data["location"] as? String ?? ""
         let bloodType = data["bloodType"] as? String ?? ""
         let imageURL = data["imageURL"] as? String ?? ""
@@ -418,7 +454,7 @@ class FirebaseDataService {
         let request = BloodSeekerModel(
             id: id,
             name: name, 
-            requestDescription: description,
+            seekerDescription: requestDesc,
             location: location,
             bloodType: bloodType,
             imageURL: imageURL,

@@ -3,7 +3,7 @@ import Foundation
 struct BloodSeeker: Identifiable {
     let id = UUID()
     let name: String
-    let description: String
+    let seekerDescription: String
     let timeAgo: String
     let location: String
     let bloodType: String
@@ -13,7 +13,7 @@ struct BloodSeeker: Identifiable {
     static let samples = [
         BloodSeeker(
             name: "James Peterson",
-            description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
+            seekerDescription: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
             timeAgo: "5 Min Ago",
             location: "London, England",
             bloodType: "B+",
@@ -21,7 +21,7 @@ struct BloodSeeker: Identifiable {
         ),
         BloodSeeker(
             name: "Sarah Johnson",
-            description: "Urgently need blood donation for surgery scheduled tomorrow morning.",
+            seekerDescription: "Urgently need blood donation for surgery scheduled tomorrow morning.",
             timeAgo: "30 Min Ago",
             location: "Manchester, UK",
             bloodType: "O-",
@@ -29,7 +29,7 @@ struct BloodSeeker: Identifiable {
         ),
         BloodSeeker(
             name: "Robert Williams",
-            description: "Need blood for emergency transfusion at City Hospital.",
+            seekerDescription: "Need blood for emergency transfusion at City Hospital.",
             timeAgo: "1 Hour Ago",
             location: "Birmingham, UK",
             bloodType: "A+",

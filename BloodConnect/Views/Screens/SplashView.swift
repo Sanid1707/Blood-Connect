@@ -4,6 +4,7 @@ struct SplashView: View {
     @State private var isActive = false
     @State private var size = 0.8
     @State private var opacity = 0.5
+    @EnvironmentObject private var authViewModel: AuthViewModel
     
     var body: some View {
         ZStack {
@@ -15,6 +16,11 @@ struct SplashView: View {
             )
             .ignoresSafeArea()
             
+            if isActive {
+                AuthView()
+                    .transition(.opacity)
+                    .environmentObject(authViewModel)
+            } else {
             VStack {
                 VStack(spacing: 20) {
                     // App logo
@@ -48,19 +54,17 @@ struct SplashView: View {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primaryRed))
                         .scaleEffect(1.5)
+                    }
                 }
             }
         }
         .onAppear {
             // Automatically transition to AuthView after 2.5 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                withAnimation {
+                withAnimation(.easeIn(duration: 0.7)) {
                     self.isActive = true
                 }
             }
-        }
-        .fullScreenCover(isPresented: $isActive) {
-            AuthView()
         }
     }
 }

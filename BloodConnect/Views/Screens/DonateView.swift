@@ -71,7 +71,7 @@ struct DonateView: View {
                     ForEach(displayedDonors, id: \.name) { donor in
                         BloodSeekerCardView(
                             name: donor.name,
-                            description: donor.description,
+                            seekerDescription: donor.description,
                             timeAgo: donor.timeAgo,
                             location: donor.location,
                             bloodType: donor.bloodType,
