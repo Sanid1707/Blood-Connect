@@ -37,9 +37,11 @@ class LoginViewModel: ObservableObject {
         
         // Load saved email if "Remember Me" was checked
         self.rememberMe = userDefaultsService.rememberMe
-        if rememberMe, let savedEmail = userDefaultsService.savedEmail {
+        if let savedEmail = userDefaultsService.savedEmail {
             self.email = savedEmail
-            print("DEBUG - LoginViewModel: Loaded saved email: \(savedEmail)")
+            print("DEBUG - LoginViewModel: Loaded saved email: \(savedEmail), rememberMe: \(self.rememberMe)")
+        } else {
+            print("DEBUG - LoginViewModel: No saved email found")
         }
         
         // Check if already authenticated
@@ -69,15 +71,13 @@ class LoginViewModel: ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink(
                         receiveCompletion: { [weak self] completion in
-                            self?.isLoading = false
-                            
                             if case .failure(let error) = completion {
+                                self?.isLoading = false
                                 self?.showAlert = true
                                 self?.alertMessage = error.localizedDescription
                             }
                         },
                         receiveValue: { [weak self] user in
-                            self?.isLoading = false
                             // Handle successful login
                             print("User logged in: \(user.name)")
                             
@@ -94,7 +94,22 @@ class LoginViewModel: ObservableObject {
                             
                             // Notify the parent AuthViewModel that we're authenticated
                             if let authViewModel = self?.getAuthViewModel() {
-                                authViewModel.authenticate()
+                                // Directly set isAuthenticated to ensure immediate UI update
+                                DispatchQueue.main.async {
+                                    authViewModel.isAuthenticated = true
+                                    authViewModel.authenticate()
+                                    
+                                    // Post notification to force UI refresh
+                                    NotificationCenter.default.post(
+                                        name: NSNotification.Name("ForceAuthUIRefresh"), 
+                                        object: nil
+                                    )
+                                    
+                                    // Set loading to false after successful login
+                                    self?.isLoading = false
+                                }
+                            } else {
+                                self?.isLoading = false
                             }
                         }
                     )

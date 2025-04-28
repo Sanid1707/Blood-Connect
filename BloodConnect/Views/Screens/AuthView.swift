@@ -44,6 +44,31 @@ struct AuthView: View {
                 print("DEBUG - AuthView found user is authenticated, updating UI")
                 authViewModel.authenticate()
             }
+            
+            // Set up notification observers
+            setupNotificationObservers()
+        }
+    }
+    
+    private func setupNotificationObservers() {
+        // Listen for logout notifications
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("LogoutRequested"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("DEBUG - Received LogoutRequested notification")
+            authViewModel.isAuthenticated = false
+        }
+        
+        // Listen for UI refresh notifications
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("ForceAuthUIRefresh"), 
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("DEBUG - Forcing UI refresh")
+            authViewModel.objectWillChange.send()
         }
     }
 }

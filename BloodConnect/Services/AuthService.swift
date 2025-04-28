@@ -575,7 +575,7 @@ class AuthService {
 
     func signOut() {
         try? keychainService.deleteAuthToken()
-        UserDefaultsService.shared.clearLoginCredentials()
+        UserDefaultsService.shared.clearAuthStateButKeepEmail()
     }
 
     func isAuthenticated() -> Bool {

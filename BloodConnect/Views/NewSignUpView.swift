@@ -7,115 +7,134 @@ struct NewSignUpView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var showPassword = false
     @State private var showBloodTypeMenu = false
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case name, email, password, eircode, availability, phone, address, description, workingHours
+    }
     
     var body: some View {
         GeometryReader { geometry in
-            VStack(alignment: .leading, spacing: 0) {
-                // MARK: - Header with Back Button and Logo
-                HStack {
-                    // Back Button
-                    Button(action: {
-                        if viewModel.userType == .organization && viewModel.organizationSignUpStep == 2 {
-                            viewModel.backToBasicInfo()
-                        } else {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                authViewModel.showSignUp(false)
+            ZStack(alignment: .bottom) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // MARK: - Header with Back Button and Logo
+                        HStack {
+                            // Back Button
+                            Button(action: {
+                                if viewModel.userType == .organization && viewModel.organizationSignUpStep == 2 {
+                                    viewModel.backToBasicInfo()
+                                } else {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        authViewModel.showSignUp(false)
+                                    }
+                                }
+                            }) {
+                                Image(systemName: "arrow.left")
+                                    .font(.title3)
+                                    .foregroundColor(.black)
+                                    .padding(12)
+                                    .background(Color.white)
+                                    .clipShape(Circle())
+                                    .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                             }
+                            
+                            Spacer()
+                            
+                            // Logo
+                            HStack(spacing: 8) {
+                                Image(systemName: "drop.fill")
+                                    .font(.title2)
+                                    .foregroundColor(Color(hex: "E6134C"))
+                                
+                                Text("BloodConnect")
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color(hex: "E6134C"))
+                            }
+                            
+                            Spacer()
                         }
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title3)
+                        .padding(.top, 16)
+                        
+                        Text("Create Account")
+                            .font(.system(size: 36, weight: .bold))
                             .foregroundColor(.black)
-                            .padding(12)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                    }
-                    
-                    Spacer()
-                    
-                    // Logo
-                    HStack(spacing: 8) {
-                        Image(systemName: "drop.fill")
-                            .font(.title2)
-                            .foregroundColor(Color(hex: "E6134C"))
+                            .padding(.top, 16)
                         
-                        Text("BloodConnect")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color(hex: "E6134C"))
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.top, 16)
-                
-                Text("Create Account")
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.top, 16)
-                
-                Text("Join BloodConnect to help save lives")
-                    .font(.body)
-                    .foregroundColor(Color.gray)
-                    .padding(.top, 4)
-                    .padding(.bottom, 16)
-                
-                // Main content based on user type and step
-                if viewModel.userType == .donor || viewModel.organizationSignUpStep == 1 {
-                    basicInfoView(geometry: geometry)
-                } else if viewModel.userType == .organization && viewModel.organizationSignUpStep == 2 {
-                    organizationDetailsView(geometry: geometry)
-                }
-                
-                Spacer() // Push content to the top
-                
-                // MARK: - Submit/Next/Create Account Button
-                Button(action: viewModel.signUp) {
-                    ZStack {
-                        Rectangle()
-                            .fill(Color(hex: "E6134C"))
-                            .frame(height: 56)
-                            .cornerRadius(12)
+                        Text("Join BloodConnect to help save lives")
+                            .font(.body)
+                            .foregroundColor(Color.gray)
+                            .padding(.top, 4)
+                            .padding(.bottom, 16)
                         
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text(viewModel.userType == .donor ? "Submit" : 
-                                    (viewModel.userType == .organization && viewModel.organizationSignUpStep == 1) ? "Next" : "Create Account")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.white)
+                        // Main content based on user type and step
+                        if viewModel.userType == .donor || viewModel.organizationSignUpStep == 1 {
+                            basicInfoView(geometry: geometry)
+                        } else if viewModel.userType == .organization && viewModel.organizationSignUpStep == 2 {
+                            organizationDetailsView(geometry: geometry)
                         }
-                    }
-                }
-                .disabled(viewModel.isLoading)
-                .padding(.bottom, 16)
-                
-                // Already have an account - only show on step 1
-                if (viewModel.userType == .donor || viewModel.organizationSignUpStep == 1) {
-                    HStack {
-                        Text("Already have an account?")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 15))
                         
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                authViewModel.showSignUp(false)
+                        // Add padding at the bottom for the fixed button area
+                        Spacer().frame(height: 100)
+                    }
+                    .padding(.horizontal, 24)
+                }
+                .frame(maxWidth: .infinity)
+                .background(Color(hex: "FAF9F9"))
+                
+                // MARK: - Fixed Button Area
+                VStack(spacing: 8) {
+                    // MARK: - Submit/Next/Create Account Button
+                    Button(action: viewModel.signUp) {
+                        ZStack {
+                            Rectangle()
+                                .fill(Color(hex: "E6134C"))
+                                .frame(height: 56)
+                                .cornerRadius(12)
+                            
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text(viewModel.userType == .donor ? "Submit" : 
+                                        (viewModel.userType == .organization && viewModel.organizationSignUpStep == 1) ? "Next" : "Create Account")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.white)
                             }
-                        }) {
-                            Text("Sign In")
-                                .foregroundColor(Color(hex: "E6134C"))
-                                .font(.system(size: 15, weight: .semibold))
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.bottom, 16)
+                    .disabled(viewModel.isLoading)
+                    
+                    // Already have an account - only show on step 1
+                    if (viewModel.userType == .donor || viewModel.organizationSignUpStep == 1) {
+                        HStack {
+                            Text("Already have an account?")
+                                .foregroundColor(.gray)
+                                .font(.system(size: 15))
+                            
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    authViewModel.showSignUp(false)
+                                }
+                            }) {
+                                Text("Sign In")
+                                    .foregroundColor(Color(hex: "E6134C"))
+                                    .font(.system(size: 15, weight: .semibold))
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
+                .background(
+                    Rectangle()
+                        .fill(Color(hex: "FAF9F9"))
+                        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: -4)
+                )
             }
-            .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(hex: "FAF9F9"))
             .alert(isPresented: $viewModel.showAlert) {
                 Alert(
                     title: Text("Error"),
@@ -130,6 +149,16 @@ struct NewSignUpView: View {
             .onChange(of: viewModel.isAuthenticated) { isAuthenticated in
                 if isAuthenticated {
                     dismiss()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            focusedField = nil
+                        }
+                    }
                 }
             }
         }
@@ -206,6 +235,7 @@ struct NewSignUpView: View {
                     .foregroundColor(.black)
                     .padding(.vertical, 16)
                     .font(.system(size: 16))
+                    .focused($focusedField, equals: .name)
             }
             .background(Color.white)
             .cornerRadius(12)
@@ -233,6 +263,7 @@ struct NewSignUpView: View {
                     .autocapitalization(.none)
                     .padding(.vertical, 16)
                     .font(.system(size: 16))
+                    .focused($focusedField, equals: .email)
             }
             .background(Color.white)
             .cornerRadius(12)
@@ -259,11 +290,13 @@ struct NewSignUpView: View {
                         .foregroundColor(.black)
                         .padding(.vertical, 16)
                         .font(.system(size: 16))
+                        .focused($focusedField, equals: .password)
                 } else {
                     SecureField("", text: $viewModel.password)
                         .foregroundColor(.black)
                         .padding(.vertical, 16)
                         .font(.system(size: 16))
+                        .focused($focusedField, equals: .password)
                 }
                 
                 Button(action: {
@@ -298,6 +331,7 @@ struct NewSignUpView: View {
                     .background(Color.white)
                     .textContentType(.postalCode)
                     .autocapitalization(.allCharacters)
+                    .focused($focusedField, equals: .eircode)
                 
                 Button(action: viewModel.validateEircode) {
                     Text("Validate")
@@ -375,6 +409,32 @@ struct NewSignUpView: View {
                     )
                 }
                 .padding(.bottom, 16)
+                
+                // Availability for donors
+                Text("Availability")
+                    .font(.system(size: 17))
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 8)
+                
+                HStack {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundColor(.gray)
+                        .padding(.leading, 16)
+                        .font(.system(size: 18))
+                    
+                    TextField("e.g., Weekends, Evenings, Anytime", text: $viewModel.availability)
+                        .foregroundColor(.black)
+                        .padding(.vertical, 16)
+                        .font(.system(size: 16))
+                        .focused($focusedField, equals: .availability)
+                }
+                .background(Color.white)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.bottom, 16)
             }
             
             // Terms and conditions
@@ -429,6 +489,7 @@ struct NewSignUpView: View {
                     .keyboardType(.phonePad)
                     .padding(.vertical, 16)
                     .font(.system(size: 16))
+                    .focused($focusedField, equals: .phone)
             }
             .background(Color.white)
             .cornerRadius(12)
@@ -454,6 +515,7 @@ struct NewSignUpView: View {
                     .foregroundColor(.black)
                     .padding(.vertical, 16)
                     .font(.system(size: 16))
+                    .focused($focusedField, equals: .address)
             }
             .background(Color.white)
             .cornerRadius(12)
@@ -477,6 +539,37 @@ struct NewSignUpView: View {
                     .padding(8)
                     .background(Color(hex: "FFFFFF"))
                     .font(.system(size: 16))
+                    .focused($focusedField, equals: .description)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    )
+            }
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            )
+            .padding(.bottom, 16)
+            
+            // Working Hours
+            Text("Working Hours")
+                .font(.system(size: 17))
+                .foregroundColor(.gray)
+                .padding(.bottom, 8)
+            
+            HStack {
+                Image(systemName: "clock")
+                    .foregroundColor(.gray)
+                    .padding(.leading, 16)
+                    .font(.system(size: 18))
+                
+                TextField("e.g., Mon-Fri 9:00 AM - 5:00 PM", text: $viewModel.workingHours)
+                    .foregroundColor(.black)
+                    .padding(.vertical, 16)
+                    .font(.system(size: 16))
+                    .focused($focusedField, equals: .workingHours)
             }
             .background(Color.white)
             .cornerRadius(12)

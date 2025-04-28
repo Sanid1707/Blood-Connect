@@ -417,7 +417,8 @@ class FirebaseAuthService: AuthService {
         do {
             try Auth.auth().signOut()
             try keychainService.deleteAuthToken()
-            UserDefaultsService.shared.clearLoginCredentials()
+            // Use our new method that preserves the email if Remember Me is enabled
+            UserDefaultsService.shared.clearAuthStateButKeepEmail()
         } catch {
             print("Error signing out: \(error.localizedDescription)")
         }

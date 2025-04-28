@@ -107,9 +107,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         if isAuth {
             print("DEBUG - User is authenticated, setting authViewModel.isAuthenticated = true")
+            // Set the published property directly
+            authViewModel.isAuthenticated = true 
             authViewModel.authenticate()
+            
+            // Setup observer for logout events
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("LogoutRequested"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                print("DEBUG - SceneDelegate received logout notification")
+                authViewModel.isAuthenticated = false
+            }
         } else {
             print("DEBUG - User is NOT authenticated")
+            // Ensure we're not authenticated
+            authViewModel.isAuthenticated = false
         }
         
         return authViewModel

@@ -58,6 +58,12 @@ class UserDefaultsService {
         self.savedEmail = nil
     }
     
+    // New method that clears auth state but preserves email if rememberMe is true
+    func clearAuthStateButKeepEmail() {
+        // Don't change rememberMe or savedEmail
+        // This will be called during logout to maintain user convenience
+    }
+    
     // MARK: - Appearance Settings
     
     var isDarkMode: Bool {

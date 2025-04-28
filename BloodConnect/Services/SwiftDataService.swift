@@ -52,6 +52,49 @@ class UserService {
         return getUsersByType(type: "organization")
     }
     
+    // Create a new user
+    func createUser(_ user: User) async throws -> User {
+        // Check if a user with this ID already exists to avoid duplicates
+        if let existingId = user.id, !existingId.isEmpty {
+            // Search for existing user
+            let predicate = #Predicate<UserModel> { $0.id == existingId }
+            let descriptor = FetchDescriptor<UserModel>(predicate: predicate)
+            
+            if let existingUser = try? modelContext.fetch(descriptor).first {
+                print("User with ID \(existingId) already exists, updating instead")
+                // Update the existing user with new data
+                if let bloodType = user.bloodType?.rawValue {
+                    existingUser.bloodType = bloodType
+                }
+                existingUser.name = user.name
+                existingUser.email = user.email
+                existingUser.phoneNumber = user.phoneNumber
+                existingUser.donationCount = user.donationCount
+                existingUser.county = user.county
+                existingUser.userType = user.userType
+                existingUser.availability = user.availability
+                existingUser.address = user.address
+                existingUser.latitude = user.latitude
+                existingUser.longitude = user.longitude
+                existingUser.organizationDescription = user.organizationDescription
+                existingUser.workingHours = user.workingHours
+                existingUser.eircode = user.eircode
+                existingUser.lastDonationDate = user.lastDonationDate
+                
+                try modelContext.save()
+                return existingUser.toUser()
+            }
+        }
+        
+        // Create a new user model
+        let userModel = UserModel(from: user)
+        modelContext.insert(userModel)
+        try modelContext.save()
+        
+        print("Created new user: \(userModel.name)")
+        return userModel.toUser()
+    }
+    
     // Synchronize with Firebase (wrapper around FirebaseDataService)
     func syncWithFirebase() async {
         do {

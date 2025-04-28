@@ -372,7 +372,10 @@ struct ProfileView: View {
             NotificationCenter.default.post(name: NSNotification.Name("ForceAuthUIRefresh"), object: nil)
             
             // For debugging
-            print("User logged out, explicitly setting isAuthenticated to false")
+            print("User logged out, email preserved if Remember Me was enabled")
+            if let savedEmail = UserDefaultsService.shared.savedEmail {
+                print("Preserved email: \(savedEmail)")
+            }
         }
     }
 }
