@@ -14,18 +14,18 @@ struct MessageRow: View {
         Button(action: action) {
             HStack {
                 Circle()
-                    .fill(AppColor.dividerGray)
+                    .fill(AppColor.divider)
                     .frame(width: 50, height: 50)
                     .overlay(
                         Text(String(message.name.prefix(1)))
                             .font(.headline)
-                            .foregroundColor(AppColor.defaultText)
+                            .foregroundColor(AppColor.text)
                     )
 
                 VStack(alignment: .leading) {
                     Text(message.name)
                         .bold()
-                        .foregroundColor(AppColor.defaultText)
+                        .foregroundColor(AppColor.text)
                     Text("Lorem ipsum is simply...")
                         .font(.caption)
                         .foregroundColor(AppColor.secondaryText)

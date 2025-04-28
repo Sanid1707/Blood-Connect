@@ -6,8 +6,10 @@ struct DonateView: View {
     @State private var organizations: [User] = []
     @State private var isLoading = true
     @State private var errorMessage: String? = nil
+    @State private var showTestOptions = false
     
     private let userService = UserService()
+    private let bloodRequestService = BloodRequestService()
     
     // Get organizations based on selected tab
     var displayedOrganizations: [User] {
@@ -106,11 +108,59 @@ struct DonateView: View {
                 }
                 .background(Color.white)
             }
+            
+            // TESTING TOOLS - Visible only in DEBUG mode
+            #if DEBUG
+            VStack {
+                Divider()
+                
+                Button(action: {
+                    showTestOptions.toggle()
+                }) {
+                    HStack {
+                        Image(systemName: "bell.badge")
+                            .foregroundColor(.red)
+                        Text("Test Notifications")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        Image(systemName: showTestOptions ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                
+                if showTestOptions {
+                    VStack(spacing: 10) {
+                        Button("Send Test Notifications To All Users") {
+                            bloodRequestService.testNotifications()
+                        }
+                        .font(.footnote)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 12)
+                        .background(Color.red.opacity(0.2))
+                        .foregroundColor(.red)
+                        .cornerRadius(4)
+                        
+                        Text("This will send test notifications to ALL users in the system")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .padding(.bottom, 10)
+                }
+            }
+            .background(Color.white.opacity(0.9))
+            #endif
         }
         .background(Color.white)
         .edgesIgnoringSafeArea(.bottom)
         .navigationBarHidden(true)
         .animation(.easeInOut(duration: 0.3), value: selectedTab)
+        .animation(.easeInOut(duration: 0.2), value: showTestOptions)
         .onAppear {
             loadOrganizations()
         }

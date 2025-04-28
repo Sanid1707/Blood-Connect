@@ -39,7 +39,8 @@ class DatabaseManager {
             BloodSeekerModel.self,
             BloodRequestModel.self,
             DonationCenterModel.self,
-            OperatingHoursModel.self
+            OperatingHoursModel.self,
+            BloodRequestEntity.self
         ])
         
         let modelConfiguration = ModelConfiguration(
@@ -100,6 +101,7 @@ class DatabaseManager {
         try deleteAllEntities(ofType: BloodRequestModel.self)
         try deleteAllEntities(ofType: DonationCenterModel.self)
         try deleteAllEntities(ofType: OperatingHoursModel.self)
+        try deleteAllEntities(ofType: BloodRequestEntity.self)
         
         print("Database reset complete")
     }

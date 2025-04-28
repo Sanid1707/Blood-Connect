@@ -1,0 +1,45 @@
+=====================================================
+🔥 FIREBASE DEPENDENCY FIX INSTRUCTIONS 🔥
+=====================================================
+
+The project is missing FirebaseAuth and FirebaseDatabase products.
+Follow these steps to fix the issue:
+
+1. Open BloodConnect.xcodeproj in Xcode
+   (Project file should already be open)
+
+2. In Xcode, navigate to:
+   - Click on BloodConnect project in Project Navigator (left sidebar)
+   - Select BloodConnect target
+   - Go to "Package Dependencies" tab
+
+3. Select the existing Firebase package and click the "-" button to remove it
+   (We'll re-add it with the correct dependencies)
+
+4. Click the "+" button to add the Firebase package again:
+   - Enter URL: https://github.com/firebase/firebase-ios-sdk.git
+   - Click "Next" 
+   - Select the latest version
+   - Make sure to select the following Firebase products:
+      • FirebaseCore (usually selected automatically)
+      • FirebaseAuth        ← REQUIRED
+      • FirebaseFirestore   ← REQUIRED
+      • FirebaseDatabase    ← REQUIRED
+   - Click "Add Package"
+
+5. Wait for the package resolution to complete
+
+6. Clean the build folder:
+   - Product > Clean Build Folder (or Shift+Command+K)
+
+7. Build the project:
+   - Product > Build (or Command+B)
+
+This should resolve the "Missing package product" errors.
+
+If you still have issues:
+- Check the build log for additional errors
+- Try closing and reopening Xcode
+- Make sure the Firebase packages are properly included in your target
+
+=====================================================

@@ -40,6 +40,7 @@ struct FindDonorsView: View {
             // Search Bar
             SearchBarView(searchText: $searchText)
                 .padding(.top, 16)
+                .padding(.horizontal)
             
             if isLoading {
                 Spacer()
@@ -66,10 +67,10 @@ struct FindDonorsView: View {
                 VStack {
                     if searchText.isEmpty {
                         Text("No donors found")
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColor.secondaryText)
                     } else {
                         Text("No donors match your search")
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColor.secondaryText)
                     }
                 }
                 .padding()
@@ -86,11 +87,10 @@ struct FindDonorsView: View {
                     }
                     .padding(.bottom, 20)
                 }
-                .background(Color.white)
+                .background(AppColor.background)
             }
         }
-        .background(Color.white)
-        .edgesIgnoringSafeArea(.bottom)
+        .background(Color(AppColor.background).edgesIgnoringSafeArea(.all))
         .navigationBarHidden(true)
         .onAppear {
             loadDonors()
@@ -148,7 +148,7 @@ struct DonorCardView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(donor.name)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(AppColor.defaultText)
+                    .foregroundColor(AppColor.text)
                 
                 HStack(spacing: 4) {
                     Image(systemName: "location.fill")
@@ -168,9 +168,9 @@ struct DonorCardView: View {
                 .padding(.trailing, 8)
         }
         .padding(18)
-        .background(AppColor.cardLightGray)
+        .background(AppColor.card)
         .cornerRadius(16)
-        .shadow(color: AppColor.shadowColor, radius: 2, x: 0, y: 1)
+        .shadow(color: AppColor.shadow, radius: 2, x: 0, y: 1)
         .onTapGesture {
             showDetails = true
         }
@@ -280,7 +280,7 @@ struct UserDetailsView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(user.name)
                                     .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(AppColor.defaultText)
+                                    .foregroundColor(AppColor.text)
                                 
                                 if let county = user.county {
                                     HStack(spacing: 4) {
@@ -436,7 +436,7 @@ struct UserDetailsView: View {
                                             
                                             Text(badgeTitle(for: user.donationCount))
                                                 .font(.system(size: 15, weight: .medium))
-                                                .foregroundColor(AppColor.defaultText)
+                                                .foregroundColor(AppColor.text)
                                         }
                                         
                                         Spacer()
@@ -568,7 +568,7 @@ struct InfoSectionView<Content: View>: View {
             HStack(spacing: 8) {
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(AppColor.defaultText)
+                    .foregroundColor(AppColor.text)
                 
                 Rectangle()
                     .fill(AppColor.primaryRed.opacity(0.2))
@@ -616,7 +616,7 @@ struct ContactRow: View {
                 
                 Text(value)
                     .font(.system(size: 15))
-                    .foregroundColor(AppColor.defaultText)
+                    .foregroundColor(AppColor.text)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }

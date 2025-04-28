@@ -29,11 +29,15 @@ class FirebaseDataService {
     
     /// Syncs all local data to Firebase and fetches new remote data
     func syncAll() async throws {
-        // Upload local changes first
+        // Upload local data first
         try await uploadLocalData()
         
-        // Then fetch remote changes
+        // Then fetch remote data
         try await fetchRemoteData()
+        
+        // Sync blood requests
+        try await uploadBloodRequests()
+        try await fetchBloodRequests()
         
         print("Full data sync completed successfully")
     }
@@ -306,58 +310,40 @@ class FirebaseDataService {
     
     private func uploadBloodRequests() async throws {
         // Get all blood requests that haven't been synced or have changed since last sync
-        let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in
-            request.cloudId == nil || (request.lastSyncedAt == nil)
-        })
+        let descriptor = FetchDescriptor<BloodRequestEntity>()
         
         let requestsToSync = try modelContext.fetch(descriptor)
         
-        for request in requestsToSync {
+        for entity in requestsToSync {
             do {
-                // If request already has a cloud ID, update existing document
-                if let cloudId = request.cloudId {
-                    try await updateBloodRequestInFirestore(request, documentId: cloudId)
-                } else {
-                    // Create new document
-                    let docRef = db.collection("bloodRequests").document()
-                    try await createBloodRequestInFirestore(request, documentId: docRef.documentID)
-                    request.cloudId = docRef.documentID
-                }
+                // Convert entity to DTO for easier access
+                let request = entity.toBloodRequest()
                 
-                request.lastSyncedAt = Date()
-                try modelContext.save()
+                // Upload to Firestore using the request ID as document ID
+                try await db.collection("bloodRequests").document(request.id).setData([
+                    "id": request.id,
+                    "patientName": request.patientName,
+                    "bloodGroup": request.bloodGroup,
+                    "unitsRequired": request.unitsRequired,
+                    "mobileNumber": request.mobileNumber,
+                    "gender": request.gender,
+                    "requestDate": request.requestDate,
+                    "requestorId": request.requestorId ?? "",
+                    "requestorName": request.requestorName,
+                    "searchRadius": request.searchRadius,
+                    "latitude": request.latitude,
+                    "longitude": request.longitude,
+                    "isUrgent": request.isUrgent,
+                    "status": request.status,
+                    "createdAt": request.createdAt,
+                    "updatedAt": request.updatedAt
+                ])
+                
+                print("Uploaded blood request: \(request.id)")
             } catch {
-                print("Error syncing blood request \(request.name): \(error.localizedDescription)")
+                print("Error syncing blood request \(entity.id): \(error.localizedDescription)")
             }
         }
-    }
-    
-    private func createBloodRequestInFirestore(_ request: BloodSeekerModel, documentId: String) async throws {
-        let requestData = bloodRequestModelToFirestore(request)
-        try await db.collection("bloodRequests").document(documentId).setData(requestData)
-    }
-    
-    private func updateBloodRequestInFirestore(_ request: BloodSeekerModel, documentId: String) async throws {
-        let requestData = bloodRequestModelToFirestore(request)
-        try await db.collection("bloodRequests").document(documentId).updateData(requestData)
-    }
-    
-    private func bloodRequestModelToFirestore(_ request: BloodSeekerModel) -> [String: Any] {
-        var requestData: [String: Any] = [
-            "id": request.id,
-            "name": request.name,
-            "requestDescription": request.seekerDescription,
-            "location": request.location,
-            "bloodType": request.bloodType,
-            "imageURL": request.imageURL,
-            "createdAt": request.createdAt
-        ]
-        
-        if let userId = request.userId {
-            requestData["userId"] = userId
-        }
-        
-        return requestData
     }
     
     private func fetchBloodRequests() async throws {
@@ -368,107 +354,80 @@ class FirebaseDataService {
             let data = document.data()
             let documentId = document.documentID
             
-            // Check if request already exists in local database by cloud ID
-            let descriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in 
-                request.cloudId == documentId 
-            })
+            guard let patientName = data["patientName"] as? String,
+                  let bloodGroup = data["bloodGroup"] as? String,
+                  let unitsRequired = data["unitsRequired"] as? Int,
+                  let mobileNumber = data["mobileNumber"] as? String,
+                  let gender = data["gender"] as? String,
+                  let requestorName = data["requestorName"] as? String,
+                  let searchRadius = data["searchRadius"] as? Double,
+                  let latitude = data["latitude"] as? Double,
+                  let longitude = data["longitude"] as? Double,
+                  let isUrgent = data["isUrgent"] as? Bool,
+                  let status = data["status"] as? String else {
+                print("Error parsing blood request data for document: \(documentId)")
+                continue
+            }
+            
+            // Convert Timestamp to Date
+            let requestDate = (data["requestDate"] as? Timestamp)?.dateValue() ?? Date()
+            let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() ?? Date()
+            let updatedAt = (data["updatedAt"] as? Timestamp)?.dateValue() ?? Date()
+            let requestorId = data["requestorId"] as? String
+            
+            // Check if request already exists in local database
+            let requestIdString = documentId
+            let predicate = #Predicate<BloodRequestEntity> { entity in
+                entity.id == requestIdString
+            }
+            let descriptor = FetchDescriptor<BloodRequestEntity>(predicate: predicate)
+            
             let matchingRequests = try modelContext.fetch(descriptor)
             
-            // If request exists locally by cloud ID, update it
-            if let existingRequest = matchingRequests.first {
-                updateBloodRequestModelFromFirestore(existingRequest, data: data)
-                existingRequest.lastSyncedAt = Date()
+            if let existingEntity = matchingRequests.first {
+                // Update existing request entity
+                existingEntity.patientName = patientName
+                existingEntity.bloodGroup = bloodGroup
+                existingEntity.unitsRequired = unitsRequired
+                existingEntity.mobileNumber = mobileNumber
+                existingEntity.gender = gender
+                existingEntity.requestDate = requestDate
+                existingEntity.requestorId = requestorId
+                existingEntity.requestorName = requestorName
+                existingEntity.searchRadius = searchRadius
+                existingEntity.latitude = latitude
+                existingEntity.longitude = longitude
+                existingEntity.isUrgent = isUrgent
+                existingEntity.status = status
+                existingEntity.updatedAt = updatedAt
             } else {
-                // Check if it exists by ID (in case it was created locally but not yet synced)
-                if let id = data["id"] as? String {
-                    let idDescriptor = FetchDescriptor<BloodSeekerModel>(predicate: #Predicate<BloodSeekerModel> { request in 
-                        request.id == id 
-                    })
-                    let matchesByID = try modelContext.fetch(idDescriptor)
-                    
-                    if let existingByID = matchesByID.first {
-                        updateBloodRequestModelFromFirestore(existingByID, data: data)
-                        existingByID.cloudId = documentId
-                        existingByID.lastSyncedAt = Date()
-                        continue
-                    }
-                }
+                // Create new request DTO first
+                let bloodRequest = BloodRequest(
+                    id: documentId,
+                    patientName: patientName,
+                    bloodGroup: bloodGroup,
+                    unitsRequired: unitsRequired,
+                    mobileNumber: mobileNumber,
+                    gender: gender,
+                    requestDate: requestDate,
+                    requestorId: requestorId,
+                    requestorName: requestorName,
+                    searchRadius: searchRadius,
+                    latitude: latitude,
+                    longitude: longitude,
+                    isUrgent: isUrgent,
+                    status: status,
+                    createdAt: createdAt,
+                    updatedAt: updatedAt
+                )
                 
-                // If not found, create a new request
-                createBloodRequestModelFromFirestore(documentId: documentId, data: data)
+                // Convert the DTO to entity and insert it
+                let entity = bloodRequest.toEntity()
+                modelContext.insert(entity)
             }
         }
         
         try modelContext.save()
-    }
-    
-    private func updateBloodRequestModelFromFirestore(_ request: BloodSeekerModel, data: [String: Any]) {
-        // Update request properties from Firestore data
-        if let name = data["name"] as? String {
-            request.name = name
-        }
-        
-        if let requestDesc = data["requestDescription"] as? String {
-            request.seekerDescription = requestDesc
-        }
-        
-        if let location = data["location"] as? String {
-            request.location = location
-        }
-        
-        if let bloodType = data["bloodType"] as? String {
-            request.bloodType = bloodType
-        }
-        
-        if let imageURL = data["imageURL"] as? String {
-            request.imageURL = imageURL
-        }
-        
-        if let userId = data["userId"] as? String {
-            request.userId = userId
-        }
-        
-        if let timestamp = data["createdAt"] as? Timestamp {
-            request.createdAt = timestamp.dateValue()
-        }
-    }
-    
-    private func createBloodRequestModelFromFirestore(documentId: String, data: [String: Any]) {
-        // Extract data fields
-        let id = data["id"] as? String ?? UUID().uuidString
-        let name = data["name"] as? String ?? ""
-        let requestDesc = data["requestDescription"] as? String ?? ""
-        let location = data["location"] as? String ?? ""
-        let bloodType = data["bloodType"] as? String ?? ""
-        let imageURL = data["imageURL"] as? String ?? ""
-        let userId = data["userId"] as? String
-        
-        let createdAt: Date
-        if let timestamp = data["createdAt"] as? Timestamp {
-            createdAt = timestamp.dateValue()
-        } else {
-            createdAt = Date()
-        }
-        
-        // Create new model
-        let request = BloodSeekerModel(
-            id: id,
-            name: name, 
-            seekerDescription: requestDesc,
-            location: location,
-            bloodType: bloodType,
-            imageURL: imageURL,
-            userId: userId
-        )
-        
-        // Set createdAt manually since we want to use the server timestamp
-        request.createdAt = createdAt
-        
-        // Set sync properties
-        request.cloudId = documentId
-        request.lastSyncedAt = Date()
-        
-        modelContext.insert(request)
     }
     
     // MARK: - Donation Center Sync

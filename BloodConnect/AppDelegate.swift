@@ -8,13 +8,19 @@
 import UIKit
 import SwiftData
 import FirebaseCore
+import UserNotifications
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+
+    private let notificationManager = NotificationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Configure Firebase
         FirebaseApp.configure()
+        
+        // Set up notifications
+        setupNotifications(application)
         
         // Initialize services on the main thread since we're accessing @MainActor-isolated types
         Task { @MainActor in
@@ -80,6 +86,47 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let dbFolderURL = appSupportURL.appendingPathComponent("default.store")
             print("SwiftData database location: \(dbFolderURL.path)")
         }
+    }
+    
+    // Setup notifications
+    private func setupNotifications(_ application: UIApplication) {
+        // Set notification delegate
+        UNUserNotificationCenter.current().delegate = self
+        
+        // Request authorization
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                print("Notification permission granted")
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            } else if let error = error {
+                print("Error requesting notification permission: \(error.localizedDescription)")
+            }
+        }
+        
+        // Set up notification categories and actions
+        notificationManager.setupNotificationActions()
+    }
+    
+    // MARK: - UNUserNotificationCenterDelegate
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        // Show notification even when app is in foreground
+        completionHandler([.banner, .sound, .badge])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        // Handle notification response
+        let userInfo = response.notification.request.content.userInfo
+        
+        if let requestId = userInfo["requestId"] as? String {
+            print("User responded to blood request notification: \(requestId)")
+            // Here you would typically navigate to the appropriate screen
+            // This would be handled by the SceneDelegate in a real app
+        }
+        
+        completionHandler()
     }
 }
 

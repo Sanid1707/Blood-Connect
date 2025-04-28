@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import Combine
+import CoreLocation
 
 @MainActor
 class UserService {
@@ -50,6 +51,129 @@ class UserService {
     // Get organization users
     func getOrganizations() -> [User] {
         return getUsersByType(type: "organization")
+    }
+    
+    // Get all donors (used for blood request notifications)
+    func getDonors() -> [User] {
+        return getUsersByType(type: "donor")
+    }
+    
+    // Get donors by blood type
+    func getDonorsByBloodType(bloodType: String) -> [User] {
+        do {
+            let descriptor = FetchDescriptor<UserModel>(sortBy: [SortDescriptor(\.name)])
+            let allUserModels = try modelContext.fetch(descriptor)
+            
+            // Filter manually to find donors with compatible blood type
+            let donorModels = allUserModels.filter { userModel in
+                userModel.userType.caseInsensitiveCompare("donor") == .orderedSame &&
+                userModel.bloodType == bloodType
+            }
+            
+            return donorModels.map { $0.toUser() }
+        } catch {
+            print("Error fetching donors by blood type: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    // Get compatible donors for a specific blood type
+    func getCompatibleDonors(forBloodType requestedBloodType: String) -> [User] {
+        do {
+            let descriptor = FetchDescriptor<UserModel>(sortBy: [SortDescriptor(\.name)])
+            let allUserModels = try modelContext.fetch(descriptor)
+            
+            // Filter manually to find donors with compatible blood type
+            let donorModels = allUserModels.filter { userModel in
+                userModel.userType.caseInsensitiveCompare("donor") == .orderedSame &&
+                isBloodCompatible(requestBloodType: requestedBloodType, donorBloodType: userModel.bloodType ?? "")
+            }
+            
+            return donorModels.map { $0.toUser() }
+        } catch {
+            print("Error fetching compatible donors: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    // Check if donor blood type is compatible with requested blood type
+    func isBloodCompatible(requestBloodType: String, donorBloodType: String) -> Bool {
+        // Blood compatibility rules
+        // O- can donate to anyone
+        if donorBloodType == "O-" {
+            return true
+        }
+        
+        // AB+ can receive from anyone
+        if requestBloodType == "AB+" {
+            return true
+        }
+        
+        // Same blood type is always compatible
+        if requestBloodType == donorBloodType {
+            return true
+        }
+        
+        // O+ can donate to A+, B+, AB+
+        if donorBloodType == "O+" {
+            return ["A+", "B+", "AB+"].contains(requestBloodType)
+        }
+        
+        // A- can donate to A+, A-, AB+, AB-
+        if donorBloodType == "A-" {
+            return ["A+", "A-", "AB+", "AB-"].contains(requestBloodType)
+        }
+        
+        // A+ can donate to A+, AB+
+        if donorBloodType == "A+" {
+            return ["A+", "AB+"].contains(requestBloodType)
+        }
+        
+        // B- can donate to B+, B-, AB+, AB-
+        if donorBloodType == "B-" {
+            return ["B+", "B-", "AB+", "AB-"].contains(requestBloodType)
+        }
+        
+        // B+ can donate to B+, AB+
+        if donorBloodType == "B+" {
+            return ["B+", "AB+"].contains(requestBloodType)
+        }
+        
+        // AB- can donate to AB+, AB-
+        if donorBloodType == "AB-" {
+            return ["AB+", "AB-"].contains(requestBloodType)
+        }
+        
+        // Default to false for safety
+        return false
+    }
+    
+    // Get donors within a certain radius of a location
+    func getDonorsWithinRadius(latitude: Double, longitude: Double, radiusInKm: Double) -> [User] {
+        // Get all donors
+        let donors = getDonors()
+        
+        // Filter donors with location data
+        let donorsWithLocation = donors.filter { donor in
+            return donor.latitude != nil && donor.longitude != nil
+        }
+        
+        // Calculate distance for each donor and filter based on radius
+        let requestLocation = CLLocation(latitude: latitude, longitude: longitude)
+        
+        let donorsInRadius = donorsWithLocation.filter { donor in
+            guard let donorLat = donor.latitude, let donorLng = donor.longitude else {
+                return false
+            }
+            
+            let donorLocation = CLLocation(latitude: donorLat, longitude: donorLng)
+            let distanceInMeters = donorLocation.distance(from: requestLocation)
+            let distanceInKilometers = distanceInMeters / 1000.0
+            
+            return distanceInKilometers <= radiusInKm
+        }
+        
+        return donorsInRadius
     }
     
     // Create a new user

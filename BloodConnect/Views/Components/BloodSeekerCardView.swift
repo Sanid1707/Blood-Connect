@@ -17,7 +17,7 @@ struct BloodSeekerCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(AppColor.defaultText)
+                        .foregroundColor(AppColor.text)
                     
                     Text(timeAgo)
                         .font(.system(size: 12))
@@ -67,9 +67,9 @@ struct BloodSeekerCardView: View {
             }
         }
         .padding(16)
-        .background(AppColor.cardLightGray)
+        .background(AppColor.card)
         .cornerRadius(16)
-        .shadow(color: AppColor.shadowColor, radius: 8, x: 0, y: 2)
+        .shadow(color: AppColor.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
@@ -78,7 +78,7 @@ struct SafeImageView: View {
     
     var body: some View {
         Circle()
-            .fill(AppColor.cardLightGray)
+            .fill(AppColor.card)
             .frame(width: 50, height: 50)
             .overlay(
                 Image(systemName: "person.circle.fill")

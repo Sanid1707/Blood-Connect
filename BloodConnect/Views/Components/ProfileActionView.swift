@@ -20,13 +20,13 @@ struct ProfileActionRow: View {
                 .frame(width: 36, height: 36)
                 .overlay(Image(systemName: icon).foregroundColor(.white))
             Text(title)
-                .foregroundColor(AppColor.defaultText)
+                .foregroundColor(AppColor.text)
             Spacer()
             Image(systemName: "chevron.right")
                 .foregroundColor(AppColor.secondaryText)
         }
         .padding()
-        .background(AppColor.cardLightGray)
+        .background(AppColor.card)
         .cornerRadius(10)
     }
 }

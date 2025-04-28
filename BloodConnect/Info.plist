@@ -21,5 +21,11 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>BloodConnect needs your location to find blood donors and blood donation requests near you</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>BloodConnect needs your location to find blood donors and blood donation requests near you</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>BloodConnect needs your location to find blood donors and blood donation requests near you</string>
 </dict>
 </plist>

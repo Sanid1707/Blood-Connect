@@ -26,7 +26,7 @@ struct NotificationCard: View {
                     Text(item.title)
                         .font(.subheadline)
                         .bold()
-                        .foregroundColor(AppColor.defaultText)
+                        .foregroundColor(AppColor.text)
                     Text(item.subtitle)
                         .font(.caption)
                         .foregroundColor(AppColor.secondaryText)
@@ -38,7 +38,7 @@ struct NotificationCard: View {
                     .foregroundColor(AppColor.secondaryText)
             }
             .padding()
-            .background(AppColor.cardLightGray)
+            .background(AppColor.card)
             .cornerRadius(10)
         }
     }

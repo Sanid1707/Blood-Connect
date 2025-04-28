@@ -8,6 +8,7 @@ struct DashboardView: View {
     @State private var showDonateView = false
     @State private var showMapScreen = false
     @State private var showBloodRequestView = false
+    @State private var showBloodRequestsListView = false
     @State private var users: [User] = []
     @State private var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 53.3498, longitude: -6.2603), // Default to Dublin
@@ -16,8 +17,11 @@ struct DashboardView: View {
     @State private var isLoading = true
     @State private var mapAnnotations: [MapLocation] = []
     @State private var debugInfo: String = "Loading..."
+    @State private var bloodRequests: [BloodRequest] = []
+    @State private var isLoadingBloodRequests = true
     
     private let userService = UserService()
+    private let bloodRequestService = BloodRequestService()
 
     let actions = [
         ("drop.fill", "Find Donors", AppColor.primaryRed),
@@ -26,12 +30,6 @@ struct DashboardView: View {
         ("hand.raised.fill", "Support", AppColor.primaryRed),
         ("exclamationmark.triangle.fill", "Blood Req.", AppColor.primaryRed),
         ("ellipsis", "More", AppColor.primaryRed)
-    ]
-
-    let bloodSeekers = [
-        (name: "James Peterson", desc: "I am anaemic and urgently need blood today.please reach out.Transportation and Feeding can be provided.", time: "5 Min Ago", location: "London, England", bloodType: "B+", imageURL: "https://randomuser.me/api/portraits/men/23.jpg"),
-        (name: "Sarah Johnson", desc: "Urgently need blood donation for surgery scheduled tomorrow morning.", time: "30 Min Ago", location: "Manchester, UK", bloodType: "O-", imageURL: "https://randomuser.me/api/portraits/women/45.jpg"),
-        (name: "Robert Williams", desc: "Need blood for emergency transfusion at City Hospital.", time: "1 Hour Ago", location: "Birmingham, UK", bloodType: "A+", imageURL: "https://randomuser.me/api/portraits/men/76.jpg")
     ]
 
     var body: some View {
@@ -198,50 +196,81 @@ struct DashboardView: View {
                             NearbyMapView()
                         }
 
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: 3), spacing: 20) {
-                            ForEach(Array(zip(actions.indices, actions)), id: \ .0) { index, actionItem in
-                                let (icon, title, color) = actionItem
+                        // Quick Actions Section
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("Quick Actions")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(AppColor.defaultText)
+                                .padding(.horizontal)
 
-                                ActionButtonView(icon: icon, title: title) {
-                                    handleActionButtonTap(index: index)
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 20) {
+                                ForEach(0..<actions.count, id: \.self) { index in
+                                    QuickActionButton(
+                                        iconName: actions[index].0,
+                                        title: actions[index].1,
+                                        color: actions[index].2,
+                                        action: {
+                                            handleQuickAction(index)
+                                        }
+                                    )
                                 }
-                                .opacity(isLoaded ? 1.0 : 0)
-                                .animation(
-                                    Animation.easeIn(duration: 0.3).delay(0.2),
-                                    value: isLoaded
-                                )
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
 
+                        // Blood Seeker Section
                         VStack(alignment: .leading, spacing: 15) {
                             HStack {
-                                Text("Blood Seeker")
+                                Text("Blood Requests")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundColor(AppColor.defaultText)
 
                                 Spacer()
 
-                                Button("See All") {}
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(AppColor.primaryRed)
+                                Button("See All") {
+                                    showBloodRequestsListView = true
+                                }
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(AppColor.primaryRed)
                             }
                             .padding(.horizontal)
 
-                            ForEach(bloodSeekers, id: \ .name) { seeker in
-                                BloodSeekerCardView(
-                                    name: seeker.name,
-                                    seekerDescription: seeker.desc,
-                                    timeAgo: seeker.time,
-                                    location: seeker.location,
-                                    bloodType: seeker.bloodType,
-                                    imageURL: seeker.imageURL,
-                                    onDonate: {
-                                        print("Donate tapped for \(seeker.name)")
-                                    }
-                                )
-                                .padding(.horizontal)
+                            if isLoadingBloodRequests {
+                                // Loading indicator
+                                HStack {
+                                    Spacer()
+                                    ProgressView("Loading blood requests...")
+                                        .padding()
+                                    Spacer()
+                                }
+                            } else if bloodRequests.isEmpty {
+                                // No requests message
+                                HStack {
+                                    Spacer()
+                                    Text("No blood requests available")
+                                        .foregroundColor(.gray)
+                                        .padding()
+                                    Spacer()
+                                }
+                            } else {
+                                // Show up to 3 most recent blood requests
+                                ForEach(Array(bloodRequests.prefix(3)), id: \.id) { request in
+                                    BloodSeekerCardView(
+                                        name: request.patientName,
+                                        seekerDescription: "Requires \(request.unitsRequired) units of \(request.bloodGroup) blood type. \(request.isUrgent ? "URGENT" : "")",
+                                        timeAgo: getTimeAgoString(date: request.createdAt),
+                                        location: "Coordinates: \(String(format: "%.2f", request.latitude)), \(String(format: "%.2f", request.longitude))",
+                                        bloodType: request.bloodGroup,
+                                        imageURL: "",
+                                        onDonate: {
+                                            // Handle donation action
+                                            print("Donate tapped for \(request.patientName)")
+                                        }
+                                    )
+                                    .padding(.horizontal)
+                                }
                             }
                         }
                     }
@@ -251,6 +280,7 @@ struct DashboardView: View {
             .background(Color.white)
             .onAppear {
                 loadMapData()
+                loadBloodRequests()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation {
@@ -262,208 +292,181 @@ struct DashboardView: View {
             NavigationLink(destination: FindDonorsView(), isActive: $showFindDonorsView) { EmptyView() }
             NavigationLink(destination: DonateView(), isActive: $showDonateView) { EmptyView() }
             NavigationLink(destination: PostBloodRequestView(), isActive: $showBloodRequestView) { EmptyView() }
+            NavigationLink(destination: BloodRequestsListView(), isActive: $showBloodRequestsListView) { EmptyView() }
         }
     }
 
-    private func handleActionButtonTap(index: Int) {
+    // MARK: - Actions
+    
+    private func handleQuickAction(_ index: Int) {
         switch index {
-        case 0:
+        case 0: // Find Donors
             showFindDonorsView = true
-        case 1:
+        case 1: // Donate
             showDonateView = true
-        case 2:
+        case 2: // Blood Bank
             print("Blood Bank tapped")
-        case 3:
+        case 3: // Support
             print("Support tapped")
-        case 4:
+        case 4: // Blood Request
             showBloodRequestView = true
-        case 5:
-            print("More tapped")
+        case 5: // More
+            showBloodRequestsListView = true
         default:
             break
         }
     }
     
-    private func loadMapData() {
-        isLoading = true
-        mapAnnotations = []
-        debugInfo = "Loading..."
+    // MARK: - Data Loading
+    
+    private func loadBloodRequests() {
+        isLoadingBloodRequests = true
         
-        // First, check if we have users in local SwiftData
-        let localUsers = userService.getAllUsers()
-        debugInfo = "Found \(localUsers.count) total users in SwiftData"
-        
-        // Process local data first if available
-        if !localUsers.isEmpty {
-            processUsers(localUsers)
-        }
-        
-        // If we still don't have any annotations, create sample data in debug mode
-        #if DEBUG
-        if mapAnnotations.isEmpty {
-            debugInfo += " | No users with valid coordinates found"
-        }
-        #else
-        // In production, automatically create sample data if none exists
-        if mapAnnotations.isEmpty {
-            createSampleLocations()
-        }
-        #endif
-        
-        // Then sync with Firebase in the background for latest data
-        Task {
-            do {
-                await userService.syncWithFirebase()
-                
-                // Get updated users after sync
-                let updatedUsers = userService.getAllUsers()
-                debugInfo += " | After sync: \(updatedUsers.count) users"
-                
-                // Only update UI if we got new data
-                if updatedUsers.count > localUsers.count {
-                    processUsers(updatedUsers)
-                }
-            } catch {
-                debugInfo += " | Sync error: \(error.localizedDescription)"
-                print("Error syncing with Firebase: \(error.localizedDescription)")
-            }
-            
-            isLoading = false
+        // Load blood requests from service
+        DispatchQueue.main.async {
+            self.bloodRequests = self.bloodRequestService.getAllBloodRequests()
+            self.isLoadingBloodRequests = false
         }
     }
     
-    private func processUsers(_ users: [User]) {
-        // Process users that have location data
-        let validUsers = users.filter { user in
-            guard let latitude = user.latitude, let longitude = user.longitude else {
-                return false
+    private func getTimeAgoString(date: Date) -> String {
+        let calendar = Calendar.current
+        let now = Date()
+        let components = calendar.dateComponents([.minute, .hour, .day], from: date, to: now)
+        
+        if let days = components.day, days > 0 {
+            return "\(days) \(days == 1 ? "day" : "days") ago"
+        } else if let hours = components.hour, hours > 0 {
+            return "\(hours) \(hours == 1 ? "hour" : "hours") ago"
+        } else if let minutes = components.minute, minutes > 0 {
+            return "\(minutes) \(minutes == 1 ? "min" : "mins") ago"
+        } else {
+            return "Just now"
+        }
+    }
+    
+    // MARK: - Map Methods
+    
+    private func loadMapData() {
+        isLoading = true
+        var newAnnotations: [MapLocation] = []
+        
+        // Get all users with location data from UserService
+        Task {
+            let allUsers = userService.getAllUsers()
+            
+            for user in allUsers {
+                if let latitude = user.latitude, let longitude = user.longitude {
+                    let locationType: MapLocation.LocationType = user.userType == "donor" ? .donor : .organization
+                    let location = MapLocation(
+                        id: user.id ?? UUID().uuidString,
+                        name: user.name,
+                        coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                        type: locationType
+                    )
+                    newAnnotations.append(location)
+                }
             }
             
-            // Verify coordinates are valid
-            return latitude != 0 && longitude != 0
+            // Process the results on the main thread
+            DispatchQueue.main.async {
+                self.mapAnnotations = newAnnotations
+                self.isLoading = false
+                
+                if !newAnnotations.isEmpty {
+                    // Center the map on the first annotation
+                    self.mapRegion = MKCoordinateRegion(
+                        center: newAnnotations[0].coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+                    )
+                }
+                
+                self.updateDebugInfo()
+            }
         }
-        
-        debugInfo += " | Valid users with locations: \(validUsers.count)"
-        
-        // Create annotations
-        self.mapAnnotations = validUsers.map { user in
-            MapLocation(
-                id: user.id ?? UUID().uuidString,
-                name: user.name,
-                coordinate: CLLocationCoordinate2D(
-                    latitude: user.latitude ?? 0,
-                    longitude: user.longitude ?? 0
-                ),
-                type: user.userType.lowercased() == "organization" ? .organization : .donor
-            )
-        }
-        
-        // Adjust region if we have annotations
-        if let firstLocation = mapAnnotations.first {
-            mapRegion.center = firstLocation.coordinate
-            mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
-        }
-        
-        isLoading = false
     }
     
     private func createSampleLocations() {
-        // Create hardcoded sample locations for the map
         mapAnnotations = [
             MapLocation(
-                id: "sample-donor-1",
-                name: "John Smith",
-                coordinate: CLLocationCoordinate2D(latitude: 53.349805, longitude: -6.260310),
+                id: "1",
+                name: "John Donor",
+                coordinate: CLLocationCoordinate2D(latitude: 53.3498, longitude: -6.2603),
                 type: .donor
             ),
             MapLocation(
-                id: "sample-donor-2",
-                name: "Mary Jones",
-                coordinate: CLLocationCoordinate2D(latitude: 53.347402, longitude: -6.257588),
+                id: "2",
+                name: "Dublin Blood Center",
+                coordinate: CLLocationCoordinate2D(latitude: 53.3445, longitude: -6.2674),
+                type: .organization
+            ),
+            MapLocation(
+                id: "3",
+                name: "Sarah Donor",
+                coordinate: CLLocationCoordinate2D(latitude: 53.3396, longitude: -6.2592),
                 type: .donor
-            ),
-            MapLocation(
-                id: "sample-org-1",
-                name: "Dublin Blood Bank",
-                coordinate: CLLocationCoordinate2D(latitude: 53.339428, longitude: -6.261924),
-                type: .organization
-            ),
-            MapLocation(
-                id: "sample-org-2",
-                name: "St. James Hospital",
-                coordinate: CLLocationCoordinate2D(latitude: 53.341598, longitude: -6.291809),
-                type: .organization
             )
         ]
         
-        // Save the sample users to SwiftData
-        Task {
-            for i in 0..<mapAnnotations.count {
-                let location = mapAnnotations[i]
-                
-                let user = User(
-                    id: location.id,
-                    email: "sample\(i+1)@example.com",
-                    name: location.name,
-                    phoneNumber: "+353 \(87000000 + i)",
-                    bloodType: i % 2 == 0 ? BloodType.aPositive : BloodType.oNegative,
-                    donationCount: Int.random(in: 0...10),
-                    county: "Dublin",
-                    userType: location.type == .donor ? "donor" : "organization",
-                    address: "Sample Address \(i+1), Dublin",
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude,
-                    organizationDescription: location.type == .organization ? "Blood donation center" : nil
-                )
-                
-                do {
-                    _ = try await userService.createUser(user)
-                } catch {
-                    debugInfo += " | Error creating user: \(error.localizedDescription)"
-                }
-            }
-            
-            debugInfo += " | Added 4 sample locations"
-        }
-        
-        // Center the map on Dublin with appropriate zoom level
-        mapRegion.center = CLLocationCoordinate2D(latitude: 53.3458, longitude: -6.2575)
-        mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.025, longitudeDelta: 0.025)
-        isLoading = false
+        updateDebugInfo()
     }
     
     private func resetMapData() {
-        isLoading = true
         mapAnnotations = []
-        
-        Task {
-            // This would need a method in the DatabaseManager to reset all users
-            // Here we'll just remove existing data from the view
-            debugInfo = "Reset requested - map data cleared"
-            isLoading = false
-        }
+        updateDebugInfo()
+    }
+    
+    private func updateDebugInfo() {
+        debugInfo = "Map has \(mapAnnotations.count) annotations (\(mapAnnotations.filter { $0.type == .donor }.count) donors, \(mapAnnotations.filter { $0.type == .organization }.count) organizations)"
     }
     
     private func zoomIn() {
-        mapRegion.span = MKCoordinateSpan(
-            latitudeDelta: max(0.001, mapRegion.span.latitudeDelta * 0.7),
-            longitudeDelta: max(0.001, mapRegion.span.longitudeDelta * 0.7)
+        let newSpan = MKCoordinateSpan(
+            latitudeDelta: max(mapRegion.span.latitudeDelta * 0.5, 0.001),
+            longitudeDelta: max(mapRegion.span.longitudeDelta * 0.5, 0.001)
         )
+        mapRegion.span = newSpan
     }
     
     private func zoomOut() {
-        mapRegion.span = MKCoordinateSpan(
-            latitudeDelta: min(0.5, mapRegion.span.latitudeDelta * 1.3),
-            longitudeDelta: min(0.5, mapRegion.span.longitudeDelta * 1.3)
+        let newSpan = MKCoordinateSpan(
+            latitudeDelta: min(mapRegion.span.latitudeDelta * 2, 50),
+            longitudeDelta: min(mapRegion.span.longitudeDelta * 2, 50)
         )
+        mapRegion.span = newSpan
     }
 }
-
-// Custom model for map annotations is now in Models/MapLocation.swift
-// Removed duplicate declaration
 
 struct DashboardView_Previews: PreviewProvider {
     static var previews: some View {
         DashboardView()
+    }
+}
+
+// Quick Action Button Component
+struct QuickActionButton: View {
+    let iconName: String
+    let title: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 12) {
+                Image(systemName: iconName)
+                    .font(.system(size: 24))
+                    .foregroundColor(color)
+                    .frame(width: 60, height: 60)
+                    .background(color.opacity(0.15))
+                    .clipShape(Circle())
+                
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppColor.defaultText)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity)
+        }
     }
 }
