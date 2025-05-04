@@ -102,7 +102,7 @@
 //        let request1 = BloodSeekerModel(
 //            id: UUID().uuidString,
 //            name: "Emergency at Dublin General",
-//            requestDescription: "Urgent need for A+ blood for surgery patient. Please help if you can donate today.",
+//            seekerDescription: "Urgent need for A+ blood for surgery patient. Please help if you can donate today.",
 //            location: "Dublin General Hospital, D02 X285",
 //            bloodType: "A+",
 //            imageURL: "blood_request_1",
@@ -112,7 +112,7 @@
 //        let request2 = BloodSeekerModel(
 //            id: UUID().uuidString,
 //            name: "Help needed for Maria",
-//            requestDescription: "Maria is 8 years old and needs O- blood for her ongoing treatment. Your donation could save her life.",
+//            seekerDescription: "Maria is 8 years old and needs O- blood for her ongoing treatment. Your donation could save her life.",
 //            location: "Children's Hospital, Dublin",
 //            bloodType: "O-",
 //            imageURL: "blood_request_2",
@@ -122,7 +122,7 @@
 //        let request3 = BloodSeekerModel(
 //            id: UUID().uuidString,
 //            name: "Cancer Patient Needs Help",
-//            requestDescription: "B+ blood needed for cancer patient undergoing chemotherapy. Regular donations needed over the next few weeks.",
+//            seekerDescription: "B+ blood needed for cancer patient undergoing chemotherapy. Regular donations needed over the next few weeks.",
 //            location: "St. James's Hospital, Dublin 8",
 //            bloodType: "B+",
 //            imageURL: "blood_request_3",
@@ -331,7 +331,7 @@ class SampleDataService {
             donationCount: 5,
             county: "Dublin",
             userType: "Donor",
-            workingHours: nil,
+    
             availability: "Weekends",
             address: "123 Donation St"
         )
@@ -346,7 +346,7 @@ class SampleDataService {
             donationCount: 8,
             county: "Louth",
             userType: "Donor",
-            workingHours: nil,
+           
             availability: "Weekdays",
             address: "456 Lifeline Ave"
         )
@@ -361,7 +361,7 @@ class SampleDataService {
             donationCount: 0,
             county: "Maynooth",
             userType: "Donor",
-            workingHours: nil,
+            
             availability: "Evenings",
             address: "789 Hope Blvd"
         )
@@ -377,7 +377,7 @@ class SampleDataService {
         let request1 = BloodSeekerModel(
             id: UUID().uuidString,
             name: "Emergency at Dublin General",
-            requestDescription: "Urgent need for A+ blood for surgery patient. Please help if you can donate today.",
+            seekerDescription: "Urgent need for A+ blood for surgery patient. Please help if you can donate today.",
             location: "Dublin General Hospital, D02 X285",
             bloodType: "A+",
             imageURL: "blood_request_1",
@@ -387,7 +387,7 @@ class SampleDataService {
         let request2 = BloodSeekerModel(
             id: UUID().uuidString,
             name: "Help needed for Maria",
-            requestDescription: "Maria is 8 years old and needs O- blood for her ongoing treatment. Your donation could save her life.",
+            seekerDescription: "Maria is 8 years old and needs O- blood for her ongoing treatment. Your donation could save her life.",
             location: "Children's Hospital, Dublin",
             bloodType: "O-",
             imageURL: "blood_request_2",
@@ -397,7 +397,7 @@ class SampleDataService {
         let request3 = BloodSeekerModel(
             id: UUID().uuidString,
             name: "Cancer Patient Needs Help",
-            requestDescription: "B+ blood needed for cancer patient undergoing chemotherapy. Regular donations needed over the next few weeks.",
+            seekerDescription: "B+ blood needed for cancer patient undergoing chemotherapy. Regular donations needed over the next few weeks.",
             location: "St. James's Hospital, Dublin 8",
             bloodType: "B+",
             imageURL: "blood_request_3",

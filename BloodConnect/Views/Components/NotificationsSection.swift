@@ -17,7 +17,7 @@ struct NotificationSection: View {
             Text(title)
                 .bold()
                 .font(.subheadline)
-                .foregroundColor(AppColor.defaultText)
+                .foregroundColor(AppColor.text)
 
             ForEach(notifications, id: \.title) { item in
                 NotificationCard(item: item) {

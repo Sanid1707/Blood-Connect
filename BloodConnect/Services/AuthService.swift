@@ -66,7 +66,12 @@
 //                        bloodType: .aPositive,
 //                        lastDonationDate: Date().addingTimeInterval(-60*60*24*30), // 30 days ago
 //                        donationCount: 5,
-//                        country: "US"
+//                        county: "Louth",
+//                        userType: "donor",
+//                        availability: "Weekends",
+//                        address: nil,
+//                        latitude: nil,
+//                        longitude: nil
 //                    )
 //                    
 //                    // Save mock token to keychain
@@ -116,7 +121,13 @@
 //                    phoneNumber: nil,
 //                    bloodType: .bPositive,
 //                    lastDonationDate: nil,
-//                    donationCount: 0
+//                    donationCount: 0,
+//                    county: "Dublin",
+//                    userType: "donor",
+//                    availability: "Weekdays",
+//                    address: nil,
+//                    latitude: nil,
+//                    longitude: nil
 //                )
 //                
 //                // Save mock token to keychain
@@ -163,7 +174,13 @@
 //                    phoneNumber: nil,
 //                    bloodType: nil,
 //                    lastDonationDate: nil,
-//                    donationCount: 0
+//                    donationCount: 0,
+//                    county: "Meath",
+//                    userType: "donor",
+//                    availability: "Evenings",
+//                    address: nil,
+//                    latitude: nil,
+//                    longitude: nil
 //                )
 //                
 //                // Save mock token to keychain
@@ -220,7 +237,22 @@
 //    ///   - password: User's password
 //    ///   - name: User's full name
 //    /// - Returns: A publisher that emits a User on success or an Error on failure
-//    func signUp(email: String, password: String, name: String, bloodType: String? = nil, country: String? = nil) -> AnyPublisher<User, Error> {
+//    func signUp(
+//        name: String,
+//        email: String,
+//        password: String,
+//        bloodType: String? = nil,
+//        county: String? = nil,
+//        userType: String,
+//        availability: String? = nil,
+//        address: String? = nil,
+//        latitude: Double? = nil,
+//        longitude: Double? = nil,
+//        phoneNumber: String? = nil,
+//        organizationDescription: String? = nil,
+//        workingHours: String? = nil,
+//        eircode: String? = nil
+//    ) -> AnyPublisher<User, Error> {
 //        // In a real app, this would make a network request to your authentication API
 //        // For now, we'll simulate a successful signup with a delay
 //        
@@ -233,11 +265,19 @@
 //                    id: "new_\(UUID().uuidString)",
 //                    email: email,
 //                    name: name,
-//                    phoneNumber: nil,
+//                    phoneNumber: phoneNumber,
 //                    bloodType: bloodTypeEnum,
 //                    lastDonationDate: nil,
 //                    donationCount: 0,
-//                    country: country
+//                    county: county,
+//                    userType: userType,
+//                    availability: availability,
+//                    address: address,
+//                    latitude: latitude,
+//                    longitude: longitude,
+//                    organizationDescription: organizationDescription,
+//                    workingHours: workingHours,
+//                    eircode: eircode
 //                )
 //                
 //                // Save mock token to keychain
@@ -299,7 +339,13 @@
 //            phoneNumber: "+1234567890",
 //            bloodType: .aPositive,
 //            lastDonationDate: Date().addingTimeInterval(-60*60*24*30),
-//            donationCount: 3
+//            donationCount: 3,
+//            county: "Westmeath",
+//            userType: "donor",
+//            availability: "Weekends",
+//            address: nil,
+//            latitude: nil,
+//            longitude: nil
 //        ))
 //        .setFailureType(to: Error.self)
 //        .eraseToAnyPublisher()
@@ -341,17 +387,20 @@ class AuthService {
     }
 
     func signUp(
+        name: String,
         email: String,
         password: String,
-        name: String,
         bloodType: String? = nil,
         county: String? = nil,
         userType: String,
-        workingHours: String? = nil,
         availability: String? = nil,
         address: String? = nil,
         latitude: Double? = nil,
-        longitude: Double? = nil
+        longitude: Double? = nil,
+        phoneNumber: String? = nil,
+        organizationDescription: String? = nil,
+        workingHours: String? = nil,
+        eircode: String? = nil
     ) -> AnyPublisher<User, Error> {
         return Future<User, Error> { promise in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -360,17 +409,19 @@ class AuthService {
                     id: "new_\(UUID().uuidString)",
                     email: email,
                     name: name,
-                    phoneNumber: nil,
+                    phoneNumber: phoneNumber,
                     bloodType: bloodTypeEnum,
                     lastDonationDate: nil,
                     donationCount: 0,
                     county: county,
                     userType: userType,
-                    workingHours: workingHours,
                     availability: availability,
                     address: address,
                     latitude: latitude,
-                    longitude: longitude
+                    longitude: longitude,
+                    organizationDescription: organizationDescription,
+                    workingHours: workingHours,
+                    eircode: eircode
                 )
 
                 do {
@@ -410,8 +461,7 @@ class AuthService {
                         lastDonationDate: Date().addingTimeInterval(-60*60*24*30),
                         donationCount: 5,
                         county: "Louth",
-                        userType: "Donor",
-                        workingHours: nil,
+                        userType: "donor",
                         availability: "Weekends",
                         address: nil,
                         latitude: nil,
@@ -450,8 +500,7 @@ class AuthService {
                     lastDonationDate: nil,
                     donationCount: 0,
                     county: "Dublin",
-                    userType: "Donor",
-                    workingHours: nil,
+                    userType: "donor",
                     availability: "Weekdays",
                     address: nil,
                     latitude: nil,
@@ -487,8 +536,7 @@ class AuthService {
                     lastDonationDate: nil,
                     donationCount: 0,
                     county: "Meath",
-                    userType: "Donor",
-                    workingHours: nil,
+                    userType: "donor",
                     availability: "Evenings",
                     address: nil,
                     latitude: nil,
@@ -527,7 +575,7 @@ class AuthService {
 
     func signOut() {
         try? keychainService.deleteAuthToken()
-        UserDefaultsService.shared.clearLoginCredentials()
+        UserDefaultsService.shared.clearAuthStateButKeepEmail()
     }
 
     func isAuthenticated() -> Bool {
@@ -550,8 +598,7 @@ class AuthService {
             lastDonationDate: Date().addingTimeInterval(-60*60*24*30),
             donationCount: 3,
             county: "Westmeath",
-            userType: "Donor",
-            workingHours: nil,
+            userType: "donor",
             availability: "Weekends",
             address: nil,
             latitude: nil,

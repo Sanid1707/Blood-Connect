@@ -319,8 +319,22 @@ class FirebaseAuthService: AuthService {
         .eraseToAnyPublisher()
     }
 
-
-    override func signUp(email: String, password: String, name: String, bloodType: String? = nil, county: String? = nil, userType: String, workingHours: String? = nil, availability: String? = nil, address: String? = nil, latitude: Double? = nil, longitude: Double? = nil) -> AnyPublisher<User, Error> {
+    override func signUp(
+        name: String,
+        email: String,
+        password: String,
+        bloodType: String? = nil,
+        county: String? = nil,
+        userType: String,
+        availability: String? = nil,
+        address: String? = nil,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
+        phoneNumber: String? = nil,
+        organizationDescription: String? = nil,
+        workingHours: String? = nil,
+        eircode: String? = nil
+    ) -> AnyPublisher<User, Error> {
         return Future<User, Error> { promise in
             Task {
                 do {
@@ -340,17 +354,19 @@ class FirebaseAuthService: AuthService {
                         id: firebaseUser.uid,
                         email: email,
                         name: name,
-                        phoneNumber: nil,
+                        phoneNumber: phoneNumber,
                         bloodType: bloodTypeEnum,
                         lastDonationDate: nil,
                         donationCount: 0,
                         county: county,
                         userType: userType,
-                        workingHours: workingHours,
                         availability: availability,
                         address: address,
                         latitude: latitude,
-                        longitude: longitude
+                        longitude: longitude,
+                        organizationDescription: organizationDescription,
+                        workingHours: workingHours,
+                        eircode: eircode
                     )
 
                     do {
@@ -401,14 +417,25 @@ class FirebaseAuthService: AuthService {
         do {
             try Auth.auth().signOut()
             try keychainService.deleteAuthToken()
-            UserDefaultsService.shared.clearLoginCredentials()
+            // Use our new method that preserves the email if Remember Me is enabled
+            UserDefaultsService.shared.clearAuthStateButKeepEmail()
         } catch {
             print("Error signing out: \(error.localizedDescription)")
         }
     }
 
     override func isAuthenticated() -> Bool {
-        return Auth.auth().currentUser != nil
+        // Check both Firebase Auth and keychain token
+        let firebaseUserExists = Auth.auth().currentUser != nil
+        let keychainTokenExists = keychainService.authTokenExists()
+        
+        print("DEBUG - FirebaseAuthService.isAuthenticated() check:")
+        print("DEBUG - Firebase currentUser exists: \(firebaseUserExists)")
+        print("DEBUG - Keychain token exists: \(keychainTokenExists)")
+        
+        // Consider authenticated if either Firebase user exists or keychain token exists
+        // In a real app, you would also validate the token
+        return firebaseUserExists || keychainTokenExists
     }
 
     override func getCurrentUser() -> AnyPublisher<User?, Error> {
@@ -441,12 +468,15 @@ class FirebaseAuthService: AuthService {
         let bloodTypeString = data["bloodType"] as? String
         let donationCount = data["donationCount"] as? Int ?? 0
         let county = data["county"] as? String
-        let userType = data["userType"] as? String ?? "Donor"
-        let workingHours = data["workingHours"] as? String
+        let userType = data["userType"] as? String ?? "donor"
         let availability = data["availability"] as? String
         let address = data["address"] as? String
         let latitude = data["latitude"] as? Double
         let longitude = data["longitude"] as? Double
+        let organizationDescription = data["organizationDescription"] as? String
+        let workingHours = data["workingHours"] as? String
+        let eircode = data["eircode"] as? String
+        
         var lastDonationDate: Date? = nil
         if let timestamp = data["lastDonationDate"] as? Timestamp {
             lastDonationDate = timestamp.dateValue()
@@ -464,11 +494,13 @@ class FirebaseAuthService: AuthService {
             donationCount: donationCount,
             county: county,
             userType: userType,
-            workingHours: workingHours,
             availability: availability,
             address: address,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            organizationDescription: organizationDescription,
+            workingHours: workingHours,
+            eircode: eircode
         )
     }
 
@@ -501,10 +533,6 @@ class FirebaseAuthService: AuthService {
             userData["county"] = county
         }
 
-        if let workingHours = user.workingHours {
-            userData["workingHours"] = workingHours
-        }
-
         if let availability = user.availability {
             userData["availability"] = availability
         }
@@ -519,6 +547,18 @@ class FirebaseAuthService: AuthService {
 
         if let longitude = user.longitude {
             userData["longitude"] = longitude
+        }
+
+        if let organizationDescription = user.organizationDescription {
+            userData["organizationDescription"] = organizationDescription
+        }
+
+        if let workingHours = user.workingHours {
+            userData["workingHours"] = workingHours
+        }
+
+        if let eircode = user.eircode {
+            userData["eircode"] = eircode
         }
 
         try await db.collection("users").document(userId).setData(userData)

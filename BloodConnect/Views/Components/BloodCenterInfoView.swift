@@ -11,7 +11,7 @@ struct BloodCenterInfoView: View {
     var name: String
     var location: String
     var rating: String
-    var description: String
+    var centerDescription: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -36,7 +36,7 @@ struct BloodCenterInfoView: View {
                     .foregroundColor(.gray)
             }
 
-            Text(description)
+            Text(centerDescription)
                 .font(.caption)
                 .foregroundColor(.gray)
         }
@@ -50,7 +50,7 @@ struct BloodCenterInfoView_Previews: PreviewProvider {
             name: "Cork Blood Center",
             location: "Cork",
             rating: "3.5",
-            description: "A blood donation facility centered at the heart of Cork"
+            centerDescription: "A blood donation facility centered at the heart of Cork"
         )
         .previewLayout(.sizeThatFits)
         .padding()

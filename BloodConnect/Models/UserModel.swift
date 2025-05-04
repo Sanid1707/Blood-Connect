@@ -17,13 +17,15 @@ final class UserModel {
     var cloudId: String?
     var lastSyncedAt: Date?
     
-    // New fields
+    // User type - "donor" or "organization"
     var userType: String
-    var workingHours: String?
     var availability: String?
     var address: String?
     var latitude: Double?
     var longitude: Double?
+    var organizationDescription: String?
+    var workingHours: String?
+    var eircode: String?
 
 
     init(id: String = UUID().uuidString,
@@ -35,11 +37,13 @@ final class UserModel {
          donationCount: Int = 0,
          county: String? = nil,
          userType: String,
-         workingHours: String? = nil,
          availability: String? = nil,
          address: String? = nil,
          latitude: Double? = nil,
-         longitude: Double? = nil) {
+         longitude: Double? = nil,
+         organizationDescription: String? = nil,
+         workingHours: String? = nil,
+         eircode: String? = nil) {
         
         self.id = id
         self.email = email
@@ -50,11 +54,13 @@ final class UserModel {
         self.donationCount = donationCount
         self.county = county
         self.userType = userType
-        self.workingHours = workingHours
         self.availability = availability
         self.address = address
         self.latitude = latitude
         self.longitude = longitude
+        self.organizationDescription = organizationDescription
+        self.workingHours = workingHours
+        self.eircode = eircode
         self.createdAt = Date()
         self.cloudId = nil
         self.lastSyncedAt = nil
@@ -72,11 +78,13 @@ final class UserModel {
             donationCount: user.donationCount,
             county: user.county,
             userType: user.userType,
-            workingHours: user.workingHours,
             availability: user.availability,
             address: user.address,
             latitude: user.latitude,
-            longitude: user.longitude
+            longitude: user.longitude,
+            organizationDescription: user.organizationDescription,
+            workingHours: user.workingHours,
+            eircode: user.eircode
         )
     }
 
@@ -92,12 +100,13 @@ final class UserModel {
             donationCount: self.donationCount,
             county: self.county,
             userType: self.userType,
-            workingHours: self.workingHours,
             availability: self.availability,
             address: self.address,
             latitude: self.latitude,
-            longitude: self.longitude
+            longitude: self.longitude,
+            organizationDescription: self.organizationDescription,
+            workingHours: self.workingHours,
+            eircode: self.eircode
         )
     }
-
 }

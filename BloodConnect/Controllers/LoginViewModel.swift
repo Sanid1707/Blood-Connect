@@ -37,14 +37,24 @@ class LoginViewModel: ObservableObject {
         
         // Load saved email if "Remember Me" was checked
         self.rememberMe = userDefaultsService.rememberMe
-        if rememberMe, let savedEmail = userDefaultsService.savedEmail {
+        if let savedEmail = userDefaultsService.savedEmail {
             self.email = savedEmail
+            print("DEBUG - LoginViewModel: Loaded saved email: \(savedEmail), rememberMe: \(self.rememberMe)")
+        } else {
+            print("DEBUG - LoginViewModel: No saved email found")
         }
         
         // Check if already authenticated
         Task {
-            if self.controller.isAuthenticated() {
+            print("DEBUG - LoginViewModel: Checking authentication status")
+            let isAuth = self.controller.isAuthenticated()
+            print("DEBUG - LoginViewModel: isAuthenticated = \(isAuth)")
+            
+            if isAuth {
+                print("DEBUG - LoginViewModel: User is authenticated, updating UI")
                 self.isAuthenticated = true
+            } else {
+                print("DEBUG - LoginViewModel: User is NOT authenticated")
             }
         }
     }
@@ -61,15 +71,13 @@ class LoginViewModel: ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink(
                         receiveCompletion: { [weak self] completion in
-                            self?.isLoading = false
-                            
                             if case .failure(let error) = completion {
+                                self?.isLoading = false
                                 self?.showAlert = true
                                 self?.alertMessage = error.localizedDescription
                             }
                         },
                         receiveValue: { [weak self] user in
-                            self?.isLoading = false
                             // Handle successful login
                             print("User logged in: \(user.name)")
                             
@@ -86,7 +94,22 @@ class LoginViewModel: ObservableObject {
                             
                             // Notify the parent AuthViewModel that we're authenticated
                             if let authViewModel = self?.getAuthViewModel() {
-                                authViewModel.authenticate()
+                                // Directly set isAuthenticated to ensure immediate UI update
+                                DispatchQueue.main.async {
+                                    authViewModel.isAuthenticated = true
+                                    authViewModel.authenticate()
+                                    
+                                    // Post notification to force UI refresh
+                                    NotificationCenter.default.post(
+                                        name: NSNotification.Name("ForceAuthUIRefresh"), 
+                                        object: nil
+                                    )
+                                    
+                                    // Set loading to false after successful login
+                                    self?.isLoading = false
+                                }
+                            } else {
+                                self?.isLoading = false
                             }
                         }
                     )
@@ -214,6 +237,7 @@ class LoginViewModel: ObservableObject {
     
     func setAuthViewModel(_ authViewModel: AuthViewModel) {
         // This allows the view to pass its EnvironmentObject to the view model
+        print("LoginViewModel - setAuthViewModel called")
         _authViewModel = authViewModel
     }
     

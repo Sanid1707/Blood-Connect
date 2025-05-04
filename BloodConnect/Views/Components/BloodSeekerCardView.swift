@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BloodSeekerCardView: View {
     let name: String
-    let description: String
+    let seekerDescription: String
     let timeAgo: String
     let location: String
     let bloodType: String
@@ -17,7 +17,7 @@ struct BloodSeekerCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(AppColor.defaultText)
+                        .foregroundColor(AppColor.text)
                     
                     Text(timeAgo)
                         .font(.system(size: 12))
@@ -29,7 +29,7 @@ struct BloodSeekerCardView: View {
                 BloodDropComponent(bloodType: bloodType)
             }
             
-            Text(description)
+            Text(seekerDescription)
                 .font(.system(size: 14))
                 .foregroundColor(AppColor.secondaryText)
                 .lineLimit(2)
@@ -67,9 +67,9 @@ struct BloodSeekerCardView: View {
             }
         }
         .padding(16)
-        .background(AppColor.cardLightGray)
+        .background(AppColor.card)
         .cornerRadius(16)
-        .shadow(color: AppColor.shadowColor, radius: 8, x: 0, y: 2)
+        .shadow(color: AppColor.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
@@ -78,7 +78,7 @@ struct SafeImageView: View {
     
     var body: some View {
         Circle()
-            .fill(AppColor.cardLightGray)
+            .fill(AppColor.card)
             .frame(width: 50, height: 50)
             .overlay(
                 Image(systemName: "person.circle.fill")
@@ -99,7 +99,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                 VStack(spacing: 16) {
                     BloodSeekerCardView(
                         name: "James Peterson",
-                        description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
+                        seekerDescription: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
                         timeAgo: "5 Min Ago",
                         location: "London, England",
                         bloodType: "B+",
@@ -110,7 +110,7 @@ struct BloodSeekerCardView_Previews: PreviewProvider {
                     
                     BloodSeekerCardView(
                         name: "Sarah Johnson",
-                        description: "Urgently need blood donation for surgery scheduled tomorrow morning.",
+                        seekerDescription: "Urgently need blood donation for surgery scheduled tomorrow morning.",
                         timeAgo: "30 Min Ago",
                         location: "Manchester, UK",
                         bloodType: "O-",

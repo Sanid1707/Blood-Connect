@@ -3,35 +3,29 @@ import SwiftUI
 struct DonateView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var selectedTab: DonateTab = .all
+    @State private var organizations: [User] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String? = nil
+    @State private var showTestOptions = false
     
-    // Sample donor data organized by categories
-    let allDonors = [
-        (name: "Oliver James", description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.", timeAgo: "7 Min Ago", location: "Washington, D.C.", bloodType: "B+", imageURL: ""),
-        (name: "Benjamin Jack", description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.", timeAgo: "30 Min Ago", location: "Florida", bloodType: "A-", imageURL: ""),
-        (name: "Thomas Carter", description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.", timeAgo: "45 Min Ago", location: "California", bloodType: "O+", imageURL: "")
-    ]
+    private let userService = UserService()
+    private let bloodRequestService = BloodRequestService()
     
-    let recentDonors = [
-        (name: "Emily Wilson", description: "Recently registered donor looking to help with emergency cases.", timeAgo: "2 Min Ago", location: "New York, NY", bloodType: "AB+", imageURL: ""),
-        (name: "Michael Brown", description: "Available for donation at City Hospital this weekend.", timeAgo: "15 Min Ago", location: "Boston, MA", bloodType: "O-", imageURL: "")
-    ]
-    
-    
-    let urgentDonors = [
-        (name: "Sarah Johnson", description: "Urgently needed for surgery happening tomorrow morning.", timeAgo: "Just Now", location: "Chicago, IL", bloodType: "B-", imageURL: ""),
-        (name: "Robert Williams", description: "Critical need for rare blood type for emergency transfusion.", timeAgo: "5 Min Ago", location: "Dallas, TX", bloodType: "AB-", imageURL: ""),
-        (name: "James Peterson", description: "Urgent request for child in ICU needing immediate transfusion.", timeAgo: "10 Min Ago", location: "Seattle, WA", bloodType: "O+", imageURL: "")
-    ]
-    
-    // Get donors based on selected tab
-    var displayedDonors: [(name: String, description: String, timeAgo: String, location: String, bloodType: String, imageURL: String)] {
+    // Get organizations based on selected tab
+    var displayedOrganizations: [User] {
         switch selectedTab {
         case .all:
-            return allDonors
+            return organizations
         case .recent:
-            return recentDonors
+            // Sort by most recently created (using default array since we don't track creation date)
+            return Array(organizations.prefix(min(2, organizations.count)))
         case .urgent:
-            return urgentDonors
+            // For demonstration, we'll consider blood types O- and B- as urgent
+            // In a real app, you would have a property on organizations to mark them as urgent
+            return organizations.filter { 
+                let bloodTypeNeeded = $0.bloodType?.rawValue.lowercased() ?? ""
+                return bloodTypeNeeded.contains("o-") || bloodTypeNeeded.contains("b-")
+            }
         }
     }
     
@@ -53,50 +47,172 @@ struct DonateView: View {
             DonateTabView(selectedTab: $selectedTab)
                 .padding(.top, 8)
             
-            // Header section with count
-            HStack {
-                Text("\(displayedDonors.count) Donors")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(AppColor.secondaryText)
+            if isLoading {
+                Spacer()
+                ProgressView("Loading organizations...")
+                    .progressViewStyle(CircularProgressViewStyle())
+                Spacer()
+            } else if let errorMessage = errorMessage {
+                Spacer()
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding()
+                
+                Button("Retry") {
+                    loadOrganizations()
+                }
+                .padding()
+                .background(AppColor.primaryRed)
+                .foregroundColor(.white)
+                .cornerRadius(8)
                 
                 Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.top, 20)
-            .padding(.bottom, 12)
-            
-            // Donor List
-            ScrollView {
-                VStack(spacing: 14) {
-                    ForEach(displayedDonors, id: \.name) { donor in
-                        BloodSeekerCardView(
-                            name: donor.name,
-                            description: donor.description,
-                            timeAgo: donor.timeAgo,
-                            location: donor.location,
-                            bloodType: donor.bloodType,
-                            imageURL: donor.imageURL,
-                            onDonate: {
-                                handleDonate(donorName: donor.name)
-                            }
-                        )
-                    }
+            } else if displayedOrganizations.isEmpty {
+                Spacer()
+                Text("No organizations found for this category")
+                    .foregroundColor(.gray)
+                    .padding()
+                Spacer()
+            } else {
+                // Header section with count
+                HStack {
+                    Text("\(displayedOrganizations.count) Organizations")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColor.secondaryText)
+                    
+                    Spacer()
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+                
+                // Organization List
+                ScrollView {
+                    VStack(spacing: 14) {
+                        ForEach(displayedOrganizations) { organization in
+                            BloodSeekerCardView(
+                                name: organization.name,
+                                seekerDescription: organization.organizationDescription ?? "Blood donation center",
+                                timeAgo: getTimeAgoString(organization),
+                                location: organization.address ?? organization.county ?? "Unknown location",
+                                bloodType: organization.bloodType?.rawValue ?? "All",
+                                imageURL: "",
+                                onDonate: {
+                                    handleDonate(organization: organization)
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
+                }
+                .background(Color.white)
             }
-            .background(Color.white)
+            
+            // TESTING TOOLS - Visible only in DEBUG mode
+            #if DEBUG
+            VStack {
+                Divider()
+                
+                Button(action: {
+                    showTestOptions.toggle()
+                }) {
+                    HStack {
+                        Image(systemName: "bell.badge")
+                            .foregroundColor(.red)
+                        Text("Test Notifications")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        Image(systemName: showTestOptions ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                
+                if showTestOptions {
+                    VStack(spacing: 10) {
+                        Button("Send Test Notifications To All Users") {
+                            bloodRequestService.testNotifications()
+                        }
+                        .font(.footnote)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 12)
+                        .background(Color.red.opacity(0.2))
+                        .foregroundColor(.red)
+                        .cornerRadius(4)
+                        
+                        Text("This will send test notifications to ALL users in the system")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .padding(.bottom, 10)
+                }
+            }
+            .background(Color.white.opacity(0.9))
+            #endif
         }
         .background(Color.white)
         .edgesIgnoringSafeArea(.bottom)
         .navigationBarHidden(true)
-        .animation(.easeInOut(duration: 0.3), value: selectedTab) // Smooth animation when changing tabs
+        .animation(.easeInOut(duration: 0.3), value: selectedTab)
+        .animation(.easeInOut(duration: 0.2), value: showTestOptions)
+        .onAppear {
+            loadOrganizations()
+        }
+    }
+    
+    private func loadOrganizations() {
+        isLoading = true
+        errorMessage = nil
+        
+        // First check if we have organizations in local SwiftData
+        let localOrganizations = userService.getOrganizations()
+        
+        if !localOrganizations.isEmpty {
+            self.organizations = localOrganizations
+            self.isLoading = false
+        }
+        
+        // Then attempt to sync with Firebase in the background
+        Task {
+            do {
+                await userService.syncWithFirebase()
+                
+                // Fetch again after sync
+                let updatedOrganizations = userService.getOrganizations()
+                if updatedOrganizations.isEmpty && localOrganizations.isEmpty {
+                    self.errorMessage = "No organizations available"
+                } else {
+                    self.organizations = updatedOrganizations
+                }
+            } catch {
+                if localOrganizations.isEmpty {
+                    self.errorMessage = "Failed to load organizations"
+                }
+                print("Error syncing with Firebase: \(error.localizedDescription)")
+            }
+            
+            self.isLoading = false
+        }
+    }
+    
+    // Helper function to generate time ago string
+    private func getTimeAgoString(_ organization: User) -> String {
+        // In a real app, you'd use the lastUpdated timestamp
+        // For now, we'll generate a random recent time
+        let randomMinutes = Int.random(in: 1...120)
+        return "\(randomMinutes) min ago"
     }
     
     // Safe method to handle donate action
-    private func handleDonate(donorName: String) {
+    private func handleDonate(organization: User) {
         // Safely handle the donation action
-        print("Donate tapped for \(donorName)")
+        print("Donate tapped for \(organization.name)")
     }
 }
 

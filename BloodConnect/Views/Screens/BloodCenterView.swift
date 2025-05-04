@@ -9,7 +9,7 @@ struct BloodCenterDetailView: View {
                 name: "Cork Blood Center",
                 location: "Cork",
                 rating: "3.5",
-                description: "A blood donation facility centered at the heart of Cork"
+                centerDescription: "A blood donation facility centered at the heart of Cork"
             )
 
             ReviewSectionView()

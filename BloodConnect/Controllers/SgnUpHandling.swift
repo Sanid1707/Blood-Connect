@@ -10,10 +10,9 @@ protocol SignUpHandling {
         county: String,
         userType: String,
         availability: String?,
-        workingHours: String?,
         address: String?,
-        latitude : Double ,
-        longitude :Double
+        latitude: Double?,
+        longitude: Double?
     ) -> AnyPublisher<User, Error>
 
     func signInWithGoogle() -> AnyPublisher<User, Error>
