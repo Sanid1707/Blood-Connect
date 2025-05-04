@@ -12,16 +12,18 @@ A revolutionary iOS application that bridges the gap between blood donors and re
 
 | Feature | Screenshot | Description |
 |---------|------------|-------------|
-| **Donor Registration** | <img src="Views/Resources/images/Singup%20page%20for%20Donors.png" width="300"> | **Purpose**: Register as a blood donor<br><br>**Features**:<br>- Personal information collection<br>- Blood type specification<br>- Medical history questionnaire<br>- Location-based registration<br>- Automatic address detection from EIR code |
-| **Center Registration** | <img src="Views/Resources/images/sign%20up%20for%20donation%20centers.png" width="300"> | **Purpose**: Register as a blood donation center<br><br>**Features**:<br>- Organization details<br>- Center location verification<br>- Operating hours setup<br>- Capacity management<br>- Automatic location verification |
-| **Login Experience** | <img src="Views/Resources/images/LoginPage.png" width="300"> | **Features**:<br>- Secure authentication<br>- Role-based access<br>- Remember me functionality<br>- Password recovery<br>- Biometric authentication support |
-| **Main Dashboard** | <img src="Views/Resources/images/Dashboard%20Page.png" width="300"> | **Key Features**:<br>- Quick access to all main functions<br>- Real-time notifications<br>- Recent activity feed<br>- Emergency requests highlight<br>- Location-based suggestions |
-| **Donor Search** | <img src="Views/Resources/images/FindDonorPage.png" width="300"> | **Features**:<br>- Advanced search filters<br>- Location-based matching<br>- Blood type compatibility<br>- Availability status<br>- Contact information |
-| **Donor Profile** | <img src="Views/Resources/images/FindDonorProfile.png" width="300"> | **Information Displayed**:<br>- Blood type<br>- Donation history<br>- Availability status<br>- Location<br>- Contact details<br>- Rating and reviews |
-| **Donation Management** | <img src="Views/Resources/images/DonatePage.png" width="300"> | **Features**:<br>- Schedule donations<br>- Track donation history<br>- View upcoming appointments<br>- Manage availability<br>- Receive reminders |
-| **Communication** | <img src="Views/Resources/images/inboxPage.png" width="300"> | **Features**:<br>- Direct messaging<br>- Appointment confirmations<br>- Emergency alerts<br>- System notifications<br>- Message history |
-| **Notifications** | <img src="Views/Resources/images/NotificationPage.png" width="300"> | **Types of Notifications**:<br>- Emergency requests<br>- Appointment reminders<br>- New messages<br>- System updates<br>- Donation requests |
-| **User Profile** | <img src="Views/Resources/images/ProfilePageUsersown.png" width="300"> | **Features**:<br>- Personal information management<br>- Donation history<br>- Settings customization<br>- Privacy controls<br>- Account preferences |
+| **Donor Registration** | <img src="BloodConnect/Views/Resources/images/Singup%20page%20for%20Donors.png" width="250" style="border-radius: 10px;"> | **Purpose**: Register as a blood donor<br><br>**Features**:<br>- Personal information collection<br>- Blood type specification<br>- Medical history questionnaire<br>- Location-based registration<br>- Automatic address detection from EIR code |
+| **Center Registration** | <img src="BloodConnect/Views/Resources/images/sign%20up%20for%20donation%20centers.png" width="250" style="border-radius: 10px;"> | **Purpose**: Register as a blood donation center<br><br>**Features**:<br>- Organization details<br>- Center location verification<br>- Operating hours setup<br>- Capacity management<br>- Automatic location verification |
+| **Login Experience** | <img src="BloodConnect/Views/Resources/images/LoginPage.png" width="250" style="border-radius: 10px;"> | **Features**:<br>- Secure authentication<br>- Role-based access<br>- Remember me functionality<br>- Password recovery<br>- Biometric authentication support |
+| **Main Dashboard** | <img src="BloodConnect/Views/Resources/images/Dashboard%20Page.png" width="250" style="border-radius: 10px;"> | **Key Features**:<br>- Quick access to all main functions<br>- Real-time notifications<br>- Recent activity feed<br>- Emergency requests highlight<br>- Location-based suggestions |
+| **Blood Request Creation** | <img src="BloodConnect/Views/Resources/images/requestblood.png" width="250" style="border-radius: 10px;"> | **Purpose**: Create blood donation requests<br><br>**Features**:<br>- Set blood type requirements<br>- Define search radius<br>- Add urgency level<br>- Include patient details<br>- Automatic geo-fencing<br>- Firebase synchronization |
+| **Donor Search** | <img src="BloodConnect/Views/Resources/images/FindDonorPage.png" width="250" style="border-radius: 10px;"> | **Features**:<br>- Advanced search filters<br>- Location-based matching<br>- Blood type compatibility<br>- Availability status<br>- Contact information |
+| **Donor Profile** | <img src="BloodConnect/Views/Resources/images/FindDonorProfile.png" width="250" style="border-radius: 10px;"> | **Information Displayed**:<br>- Blood type<br>- Donation history<br>- Availability status<br>- Location<br>- Contact details<br>- Rating and reviews |
+| **Donation Management** | <img src="BloodConnect/Views/Resources/images/DonatePage.png" width="250" style="border-radius: 10px;"> | **Features**:<br>- Schedule donations<br>- Track donation history<br>- View upcoming appointments<br>- Manage availability<br>- Receive reminders |
+| **Communication** | <img src="BloodConnect/Views/Resources/images/inboxPage.png" width="250" style="border-radius: 10px;"> | **Features**:<br>- Direct messaging<br>- Appointment confirmations<br>- Emergency alerts<br>- System notifications<br>- Message history |
+| **Notifications** | <img src="BloodConnect/Views/Resources/images/NotificationPage.png" width="250" style="border-radius: 10px;"> | **Types of Notifications**:<br>- Emergency requests<br>- Appointment reminders<br>- New messages<br>- System updates<br>- Donation requests |
+| **Blood Request Notifications** | <img src="BloodConnect/Views/Resources/images/notification%20on%20blood%20request.png" width="250" style="border-radius: 10px;"> | **Smart Notification System**:<br>- Real-time alerts for matching blood types<br>- Geo-fenced notifications<br>- Priority-based delivery<br>- Request history tracking<br>- Firebase synchronization |
+| **User Profile** | <img src="BloodConnect/Views/Resources/images/ProfilePageUsersown.png" width="250" style="border-radius: 10px;"> | **Features**:<br>- Personal information management<br>- Donation history<br>- Settings customization<br>- Privacy controls<br>- Account preferences |
 
 ## 🌟 Features
 
@@ -41,6 +43,13 @@ A revolutionary iOS application that bridges the gap between blood donors and re
 - 🤝 **Community Building**: Connect with regular donors
 - 📅 **Scheduling System**: Easy appointment management
 - 🏆 **Rewards Program**: Incentives for regular donors
+
+### New Features
+- 🌐 **Geo-Fenced Notifications**: Smart radius-based alert system
+- 🔄 **Real-time Sync**: Instant Firebase synchronization
+- 📝 **Request History**: Track all blood requests
+- 🎯 **Smart Matching**: Automatic donor-recipient matching
+- 📊 **Analytics**: Track request success rates
 
 ## 📱 Screenshots
 
