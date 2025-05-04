@@ -8,22 +8,103 @@
 
 A revolutionary iOS application that bridges the gap between blood donors and recipients, leveraging modern technology to make blood donation more accessible, efficient, and life-saving.
 
-## 📋 Table of Contents
+## 📱 User Interface Walkthrough
 
-- [Features](#-features)
-- [Screenshots](#-screenshots)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Architecture](#-architecture)
-- [API Documentation](#-api-documentation)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Built With](#-built-with)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Authors](#-authors)
-- [Acknowledgments](#-acknowledgments)
-- [Contact](#-contact)
+### 1. Authentication & Registration
+BloodConnect offers two distinct registration paths to cater to different user needs:
+
+#### For Donors
+<img src="Views/Resources/images/Singup%20page%20for%20Donors.png" width="300" alt="Donor Registration">
+- **Purpose**: Register as a blood donor
+- **Features**:
+  - Personal information collection
+  - Blood type specification
+  - Medical history questionnaire
+  - Location-based registration
+  - Automatic address detection from EIR code
+
+#### For Donation Centers
+<img src="Views/Resources/images/sign%20up%20for%20donation%20centers.png" width="300" alt="Center Registration">
+- **Purpose**: Register as a blood donation center
+- **Features**:
+  - Organization details
+  - Center location verification
+  - Operating hours setup
+  - Capacity management
+  - Automatic location verification
+
+#### Login Experience
+<img src="Views/Resources/images/LoginPage.png" width="300" alt="Login Page">
+- **Features**:
+  - Secure authentication
+  - Role-based access
+  - Remember me functionality
+  - Password recovery
+  - Biometric authentication support
+
+### 2. Main Dashboard
+<img src="Views/Resources/images/Dashboard%20Page.png" width="300" alt="Dashboard">
+- **Key Features**:
+  - Quick access to all main functions
+  - Real-time notifications
+  - Recent activity feed
+  - Emergency requests highlight
+  - Location-based suggestions
+
+### 3. Donor Search & Matching
+<img src="Views/Resources/images/FindDonorPage.png" width="300" alt="Find Donor">
+- **Features**:
+  - Advanced search filters
+  - Location-based matching
+  - Blood type compatibility
+  - Availability status
+  - Contact information
+
+### 4. Donor Profiles
+<img src="Views/Resources/images/FindDonorProfile.png" width="300" alt="Donor Profile">
+- **Information Displayed**:
+  - Blood type
+  - Donation history
+  - Availability status
+  - Location
+  - Contact details
+  - Rating and reviews
+
+### 5. Donation Management
+<img src="Views/Resources/images/DonatePage.png" width="300" alt="Donate Page">
+- **Features**:
+  - Schedule donations
+  - Track donation history
+  - View upcoming appointments
+  - Manage availability
+  - Receive reminders
+
+### 6. Communication
+<img src="Views/Resources/images/inboxPage.png" width="300" alt="Inbox">
+- **Features**:
+  - Direct messaging
+  - Appointment confirmations
+  - Emergency alerts
+  - System notifications
+  - Message history
+
+### 7. Notifications
+<img src="Views/Resources/images/NotificationPage.png" width="300" alt="Notifications">
+- **Types of Notifications**:
+  - Emergency requests
+  - Appointment reminders
+  - New messages
+  - System updates
+  - Donation requests
+
+### 8. User Profile
+<img src="Views/Resources/images/ProfilePageUsersown.png" width="300" alt="User Profile">
+- **Features**:
+  - Personal information management
+  - Donation history
+  - Settings customization
+  - Privacy controls
+  - Account preferences
 
 ## 🌟 Features
 
